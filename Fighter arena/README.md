@@ -16,12 +16,21 @@ This folder now contains a lightweight 3D prototype for the future shooting game
 Use the bundled server so static files and multiplayer APIs run together:
 
 ```bash
-cd "/Users/josephwu/Desktop/Coded/What i coded/Fighter arena"
+cd Fighter\ arena
 python3 server.py 4174
 ```
 
 Then open `http://127.0.0.1:4174/` in your browser.
 
-For internet play, you can run `python3 server.py 80` and use
-`http://<your-server-ip>/`. If you keep `4174`, open TCP `4174` in your cloud
-firewall/security group.
+## Publish online
+
+For internet play, you can run the same server on a public machine:
+
+```bash
+python3 server.py 80
+```
+
+Then open `http://<your-server-ip>/`.
+If you keep port `4174` instead, make sure TCP `4174` is allowed in your cloud
+firewall or security group.
+
