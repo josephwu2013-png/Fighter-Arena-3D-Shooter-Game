@@ -4,16 +4,27 @@ About
 Fighter Arena is a 3D shooter game prototype made with AI assistance. It includes terrain, weapons, zombie gameplay, multiplayer features, and mobile/desktop controls.
 How to Run Fighter Arena
 
-Fighter Arena is a browser-based 3D shooter game. It uses HTML, CSS, and JavaScript for the game, and it also uses a small Python server to run the game correctly.
-To play the game, first download this repository from GitHub. After downloading it, open the project folder on your computer. Inside the repository, you will see a folder called Fighter arena. Open that folder, because this is where the game files are stored.
+## How to run?
+Use the bundled server so static files and multiplayer APIs run together:
 
-Before running the game, make sure Python is installed on your computer. You can check this by opening Terminal or Command Prompt and typing python3 --version. If that does not work, try python --version instead. If Python is not installed, you will need to install Python first.
+```bash
+cd Fighter\ arena
+python3 server.py 4174
+```
 
-After Python is ready, open Terminal or Command Prompt inside the Fighter arena folder. Then run this command: python3 server.py 4174. If your computer uses python instead of python3, run python server.py 4174.
+Then open `http://127.0.0.1:4174/` in your browser.
 
-When the server starts, open your browser and go to http://127.0.0.1:4174/. The game should now open in your browser.
+## Publish online
 
-Please do not open index.html directly by double-clicking it. The game should be started with the Python server because multiplayer rooms, player updates, health, respawn, zombie mode, and other features need the server to work properly.
+For internet play, you can run the same server on a public machine:
+
+```bash
+python3 server.py 80
+```
+
+Then open `http://<your-server-ip>/`.
+If you keep port `4174` instead, make sure TCP `4174` is allowed in your cloud
+firewall or security group.
 
 Controls
 
@@ -25,7 +36,7 @@ Fighter Arena includes several game modes. You can play Single Player, Zombie Mo
 Playing With Friends
 
 For local play on your own computer, use http://127.0.0.1:4174/ after starting the server.
-For internet play, the host needs to run the server on a public server or open the correct network port. For example, the host can run the game on port 80 by using python3 server.py 80. Other players can then open the host’s server address in their browser.
+For internet play, the host needs to run the server on a public server or open the correct network port. For example, the host can run the game on port 80 by using python3 server.py 80. Other players can then open the host’s server address in their browser. you can play with friends that have the same network as you.
 
 If you use port 4174, make sure TCP port 4174 is open in your firewall or cloud server settings.
 
