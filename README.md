@@ -33,3 +33,5 @@ Troubleshooting
 
 If the game does not open, first make sure you are inside the Fighter arena folder when running the server. Also make sure Python is installed. Then check that you started the server with python3 server.py 4174 or python server.py 4174. Finally, make sure you opened http://127.0.0.1:4174/ in your browser.
 If port 4174 is already being used, you can use another port, such as 5000. Start the server with python3 server.py 5000, then open http://127.0.0.1:5000/ in your browser.
+
+Please give me feedbacks if you find any problems and issues, I will fix it as fast as I can! 
