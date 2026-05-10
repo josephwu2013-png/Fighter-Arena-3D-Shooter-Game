@@ -45,6 +45,8 @@ ROOM_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 ROOM_NAME_MAX_LENGTH = 36
 ROOM_MIN_PLAYERS_MIN = 1
 ROOM_MIN_PLAYERS_MAX = 8
+CHAT_MAX_MESSAGES = 40
+CHAT_MESSAGE_MAX_LENGTH = 220
 PATH_SEARCH_ANGLES = (0.0, -math.pi / 2, math.pi / 2, -math.pi / 3, math.pi / 3, math.pi * 0.82, -math.pi * 0.82)
 PATH_STEP_SCALES = (1.0, 0.66, 0.36)
 STATIC_HOUSES = (
@@ -59,7 +61,16 @@ BASE_DIR = Path(__file__).resolve().parent
 MULTIPLAYER_VARIANTS = {
     "pvp": "pvp",
     "horde": "horde",
+    "arcade": "arcade",
 }
+
+MINI_GAME_SPECS = {
+    "sharpshooter": {"duration": 45.0, "zombies": False},
+    "zombie-blitz": {"duration": 75.0, "zombies": True},
+    "checkpoint-sprint": {"duration": 90.0, "zombies": False},
+    "distance-dash": {"duration": 60.0, "zombies": False},
+}
+DEFAULT_MINI_GAME = "sharpshooter"
 
 
 def _coerce_float(value: Any, fallback: float):
@@ -163,7 +174,16 @@ def _wall_rect(wall: Dict[str, Any]):
 
 def _sanitize_variant(value: Any):
     key = str(value or MULTIPLAYER_VARIANTS["pvp"]).strip().lower()
-    return MULTIPLAYER_VARIANTS["horde"] if key == MULTIPLAYER_VARIANTS["horde"] else MULTIPLAYER_VARIANTS["pvp"]
+    if key == MULTIPLAYER_VARIANTS["horde"]:
+        return MULTIPLAYER_VARIANTS["horde"]
+    if key == MULTIPLAYER_VARIANTS["arcade"]:
+        return MULTIPLAYER_VARIANTS["arcade"]
+    return MULTIPLAYER_VARIANTS["pvp"]
+
+
+def _sanitize_mini_game(value: Any):
+    key = str(value or DEFAULT_MINI_GAME).strip().lower()
+    return key if key in MINI_GAME_SPECS else DEFAULT_MINI_GAME
 
 
 
@@ -171,7 +191,11 @@ def _sanitize_room_name(value: Any, variant: str):
     raw = str(value or "").strip()
     if raw:
         return raw[:ROOM_NAME_MAX_LENGTH]
-    return "Horde Room" if variant == MULTIPLAYER_VARIANTS["horde"] else "PvP Room"
+    if variant == MULTIPLAYER_VARIANTS["horde"]:
+        return "Horde Room"
+    if variant == MULTIPLAYER_VARIANTS["arcade"]:
+        return "Mini Games Room"
+    return "PvP Room"
 
 
 
@@ -226,22 +250,29 @@ def _choose_step(source_x: float, source_z: float, target_x: float, target_z: fl
 
 
 class MultiplayerRoom:
-    def __init__(self, room_id: str, room_name: str, variant: str, is_private: bool, min_players: int, code: str = ""):
+    def __init__(self, room_id: str, room_name: str, variant: str, is_private: bool, min_players: int, code: str = "", mini_game: str = ""):
         self.room_id = room_id
         self.room_name = _sanitize_room_name(room_name, variant)
         self.variant = _sanitize_variant(variant)
-        self.enable_zombies = self.variant == MULTIPLAYER_VARIANTS["horde"]
+        self.mini_game = _sanitize_mini_game(mini_game) if self.variant == MULTIPLAYER_VARIANTS["arcade"] else ""
+        self._mini_game_spec = MINI_GAME_SPECS.get(self.mini_game, MINI_GAME_SPECS[DEFAULT_MINI_GAME]) if self.mini_game else None
+        self.enable_zombies = self.variant == MULTIPLAYER_VARIANTS["horde"] or bool(self._mini_game_spec and self._mini_game_spec.get("zombies"))
         self.is_private = bool(is_private)
         self.code = str(code or "").upper()
         self.min_players = _sanitize_min_players(min_players, self.variant)
-        self.started = not self.enable_zombies or self.min_players <= 1
+        self.started = self.variant != MULTIPLAYER_VARIANTS["horde"] or self.min_players <= 1
         self.created_at = time.time()
+        self.mini_game_started_at = self.created_at if self.mini_game else 0.0
+        self.mini_game_duration = float(self._mini_game_spec.get("duration", 0.0)) if self._mini_game_spec else 0.0
+        self.mini_game_ends_at = self.mini_game_started_at + self.mini_game_duration if self.mini_game_duration > 0 else 0.0
         self._lock = threading.Lock()
         self._players: Dict[str, Dict[str, Any]] = {}
         self._zombies: Dict[str, Dict[str, Any]] = {}
         self._walls: Dict[str, Dict[str, Any]] = {}
         self._next_zombie_id = 1
         self._next_wall_id = 1
+        self._chat: List[Dict[str, Any]] = []
+        self._next_chat_id = 1
         self._last_zombie_step_at = self.created_at
         self._next_zombie_spawn_at = self.created_at + 1.0
         self.host_id = ""
@@ -262,9 +293,17 @@ class MultiplayerRoom:
             "yaw": 0.0,
             "pitch": 0.0,
             "weapon": "M134 Minigun",
+            "weaponType": "minigun",
             "health": PLAYER_MAX_HEALTH,
             "maxHealth": PLAYER_MAX_HEALTH,
             "isDead": False,
+            "aiming": False,
+            "firing": False,
+            "sprinting": False,
+            "sliding": False,
+            "reloading": False,
+            "reloadPhase": 0.0,
+            "action": 0.0,
             "kills": 0,
             "deaths": 0,
             "zombieKills": 0,
@@ -272,10 +311,13 @@ class MultiplayerRoom:
             "potionReadyAt": 0.0,
             "wallReadyAt": 0.0,
             "updatedAt": now,
+            "miniGameScore": 0.0,
+            "miniGameProgress": "",
         }
         with self._lock:
             self._refresh_locked(now)
             self._players[player_id] = player
+            self._append_system_chat_locked(f"{safe_name} joined the room.", now)
             if not self.host_id:
                 self.host_id = player_id
             self._update_started_locked(now)
@@ -289,6 +331,9 @@ class MultiplayerRoom:
             if not player:
                 return None
 
+            player_name = str(payload.get("name", "")).strip()
+            if player_name:
+                player["name"] = player_name[:24]
             if not player["isDead"]:
                 player["x"] = _coerce_float(payload.get("x"), player["x"])
                 player["y"] = _coerce_float(payload.get("y"), player["y"])
@@ -298,6 +343,24 @@ class MultiplayerRoom:
             weapon_name = payload.get("weapon")
             if isinstance(weapon_name, str) and weapon_name.strip():
                 player["weapon"] = weapon_name.strip()[:48]
+            weapon_type = payload.get("weaponType")
+            if isinstance(weapon_type, str) and weapon_type.strip():
+                player["weaponType"] = weapon_type.strip()[:24]
+            player["aiming"] = bool(payload.get("aiming"))
+            player["firing"] = bool(payload.get("firing"))
+            player["sprinting"] = bool(payload.get("sprinting"))
+            player["sliding"] = bool(payload.get("sliding"))
+            player["reloading"] = bool(payload.get("reloading"))
+            player["reloadPhase"] = max(0.0, min(1.0, _coerce_float(payload.get("reloadPhase"), player.get("reloadPhase", 0.0))))
+            player["action"] = max(0.0, min(1.0, _coerce_float(payload.get("action"), player.get("action", 0.0))))
+            if self.mini_game and self._mini_game_active_locked(now):
+                incoming_score = payload.get("miniGameScore")
+                if incoming_score is not None:
+                    score_value = max(0.0, _coerce_float(incoming_score, player.get("miniGameScore", 0.0)))
+                    player["miniGameScore"] = max(_coerce_float(player.get("miniGameScore"), 0.0), score_value)
+                progress_value = payload.get("miniGameProgress")
+                if isinstance(progress_value, str):
+                    player["miniGameProgress"] = progress_value.strip()[:48]
             player["updatedAt"] = now
             self._update_started_locked(now)
             return player.copy()
@@ -372,7 +435,9 @@ class MultiplayerRoom:
 
     def leave(self, player_id: str):
         with self._lock:
-            self._players.pop(player_id, None)
+            player = self._players.pop(player_id, None)
+            if player:
+                self._append_system_chat_locked(f"{player.get("name", "Player")} left the room.", time.time())
             if self.host_id == player_id:
                 self.host_id = next(iter(self._players), "")
             if not self._players:
@@ -493,12 +558,38 @@ class MultiplayerRoom:
             }
             if killed:
                 player["zombieKills"] += 1
+                if self.mini_game == "zombie-blitz":
+                    player["miniGameScore"] = max(_coerce_float(player.get("miniGameScore"), 0.0), _coerce_float(player.get("zombieKills"), 0.0))
                 self._zombies.pop(zombie_key, None)
                 response["removedZombieId"] = zombie_key
                 response["self"] = player.copy()
             else:
                 response["zombie"] = zombie.copy()
             return response, 200
+
+    def post_chat(self, player_id: str, message: Any):
+        now = time.time()
+        with self._lock:
+            self._refresh_locked(now)
+            player = self._players.get(player_id)
+            if not player:
+                return {"ok": False, "error": "Player not found"}, 404
+            content = str(message or "").strip()[:CHAT_MESSAGE_MAX_LENGTH]
+            if not content:
+                return {"ok": False, "error": "Message required"}, 400
+            entry = {
+                "id": self._next_chat_id,
+                "playerId": player_id,
+                "name": player.get("name", "Player"),
+                "text": content,
+                "timestamp": now,
+                "system": False,
+            }
+            self._next_chat_id += 1
+            self._chat.append(entry)
+            if len(self._chat) > CHAT_MAX_MESSAGES:
+                self._chat = self._chat[-CHAT_MAX_MESSAGES:]
+            return {"ok": True, "message": entry, "room": self._room_info_locked(include_code=True)}, 200
 
     def heal(self, player_id: str):
         now = time.time()
@@ -554,22 +645,86 @@ class MultiplayerRoom:
             self._revive_player_locked(player, now, force=True)
             return player.copy()
 
+    def _scoreboard_value_locked(self, player: Dict[str, Any]):
+        if self.variant == MULTIPLAYER_VARIANTS["arcade"]:
+            return _coerce_float(player.get("miniGameScore"), 0.0)
+        if self.variant == MULTIPLAYER_VARIANTS["horde"]:
+            return _coerce_float(player.get("zombieKills"), 0.0) * 1000.0 + _coerce_float(player.get("kills"), 0.0) * 10.0 - _coerce_float(player.get("deaths"), 0.0)
+        return _coerce_float(player.get("kills"), 0.0) * 1000.0 - _coerce_float(player.get("deaths"), 0.0)
+
+    def _append_system_chat_locked(self, text: str, now: float):
+        message = str(text or "").strip()[:CHAT_MESSAGE_MAX_LENGTH]
+        if not message:
+            return
+        self._chat.append({
+            "id": self._next_chat_id,
+            "playerId": "system",
+            "name": "System",
+            "text": message,
+            "timestamp": now,
+            "system": True,
+        })
+        self._next_chat_id += 1
+        if len(self._chat) > CHAT_MAX_MESSAGES:
+            self._chat = self._chat[-CHAT_MAX_MESSAGES:]
+
     def _room_info_locked(self, include_code: bool = False):
         host_name = self._players.get(self.host_id, {}).get("name", "") if self.host_id else ""
         player_count = len(self._players)
+        now = time.time()
+        ordered_players = sorted(
+            self._players.values(),
+            key=lambda item: (self._scoreboard_value_locked(item), -float(item.get("updatedAt", 0.0))),
+            reverse=True,
+        )
+        roster = [
+            {
+                "id": player.get("id", ""),
+                "name": player.get("name", "Player"),
+                "health": _coerce_float(player.get("health"), PLAYER_MAX_HEALTH),
+                "isDead": bool(player.get("isDead")),
+                "kills": int(_coerce_float(player.get("kills"), 0.0)),
+                "deaths": int(_coerce_float(player.get("deaths"), 0.0)),
+                "zombieKills": int(_coerce_float(player.get("zombieKills"), 0.0)),
+                "miniGameScore": _coerce_float(player.get("miniGameScore"), 0.0),
+                "miniGameProgress": str(player.get("miniGameProgress", ""))[:48],
+            }
+            for player in ordered_players
+        ]
+        leaderboard = [
+            {
+                "id": player_info["id"],
+                "name": player_info["name"],
+                "score": player_info["miniGameScore"] if self.variant == MULTIPLAYER_VARIANTS["arcade"] else (player_info["zombieKills"] if self.variant == MULTIPLAYER_VARIANTS["horde"] else player_info["kills"]),
+                "progress": player_info["miniGameProgress"],
+            }
+            for player_info in roster
+        ]
+        chat = [entry.copy() for entry in self._chat[-CHAT_MAX_MESSAGES:]]
         return {
             "id": self.room_id,
             "name": self.room_name,
             "variant": self.variant,
+            "miniGame": self.mini_game,
             "private": self.is_private,
             "code": self.code if include_code and self.code else "",
             "minPlayers": self.min_players,
             "playerCount": player_count,
-            "waitingForPlayers": max(0, self.min_players - player_count) if self.enable_zombies and not self.started else 0,
+            "waitingForPlayers": max(0, self.min_players - player_count) if self.variant == MULTIPLAYER_VARIANTS["horde"] and not self.started else 0,
             "started": self.started,
             "hostName": host_name,
             "createdAt": self.created_at,
+            "miniGameStartedAt": self.mini_game_started_at,
+            "miniGameDuration": self.mini_game_duration,
+            "miniGameEndsAt": self.mini_game_ends_at,
+            "miniGameActive": bool(self.mini_game and self.mini_game_ends_at > now),
+            "leaderboard": leaderboard,
+            "roster": roster,
+            "chat": chat,
         }
+
+    def _mini_game_active_locked(self, now: float):
+        return bool(self.mini_game and self.mini_game_ends_at > now)
 
     def _iter_obstacles_locked(self, include_walls: bool = True):
         for obstacle in STATIC_OBSTACLES:
@@ -588,7 +743,7 @@ class MultiplayerRoom:
             self._zombies.clear()
 
     def _update_started_locked(self, now: float):
-        if not self.enable_zombies:
+        if self.variant != MULTIPLAYER_VARIANTS["horde"]:
             self.started = True
             return
         if not self.started and len(self._players) >= self.min_players:
@@ -751,11 +906,11 @@ class RoomManager:
         self._rooms: Dict[str, MultiplayerRoom] = {}
         self._player_rooms: Dict[str, str] = {}
 
-    def create_room(self, room_name: str, host_name: str, variant: str, is_private: bool, min_players: int):
+    def create_room(self, room_name: str, host_name: str, variant: str, is_private: bool, min_players: int, mini_game: str = ""):
         next_variant = _sanitize_variant(variant)
         room_id = uuid.uuid4().hex[:10]
         code = _generate_room_code() if is_private else ""
-        room = MultiplayerRoom(room_id, room_name, next_variant, is_private, min_players, code=code)
+        room = MultiplayerRoom(room_id, room_name, next_variant, is_private, min_players, code=code, mini_game=mini_game)
         player = room.join(host_name)
         with self._lock:
             self._rooms[room_id] = room
@@ -781,11 +936,12 @@ class RoomManager:
                     break
         if room is None:
             room_info, player = self.create_room(
-                room_name="Quick Match Horde" if next_variant == MULTIPLAYER_VARIANTS["horde"] else "Quick Match PvP",
+                room_name="Quick Match Horde" if next_variant == MULTIPLAYER_VARIANTS["horde"] else "Quick Match PvP" if next_variant == MULTIPLAYER_VARIANTS["pvp"] else "Quick Match Mini Games",
                 host_name=name,
                 variant=next_variant,
                 is_private=False,
                 min_players=2 if next_variant == MULTIPLAYER_VARIANTS["horde"] else 1,
+                mini_game=DEFAULT_MINI_GAME if next_variant == MULTIPLAYER_VARIANTS["arcade"] else "",
             )
             return room_info, player
         player = room.join(name)
@@ -957,6 +1113,7 @@ class NoCacheHandler(http.server.SimpleHTTPRequestHandler):
                 variant=payload.get("variant", MULTIPLAYER_VARIANTS["pvp"]),
                 is_private=bool(payload.get("private")),
                 min_players=payload.get("minPlayers", 1),
+                mini_game=payload.get("miniGame", DEFAULT_MINI_GAME),
             )
             self._write_json(201, {"room": room_info, "player": player})
             return
@@ -1059,6 +1216,22 @@ class NoCacheHandler(http.server.SimpleHTTPRequestHandler):
                 self._write_json(404, {"error": "Player not found"})
                 return
             result, status = room.zombie_hit(player_id, zombie_id, payload.get("damage", 1))
+            self._write_json(status, result)
+            return
+
+        if parsed.path == "/api/multiplayer/chat":
+            if not isinstance(payload, dict):
+                self._write_json(400, {"error": "Invalid JSON body"})
+                return
+            player_id = str(payload.get("playerId", "")).strip()
+            if not player_id:
+                self._write_json(400, {"error": "playerId is required"})
+                return
+            room = ROOM_MANAGER.room_for_player(player_id)
+            if room is None:
+                self._write_json(404, {"error": "Player not found"})
+                return
+            result, status = room.post_chat(player_id, payload.get("message", ""))
             self._write_json(status, result)
             return
 

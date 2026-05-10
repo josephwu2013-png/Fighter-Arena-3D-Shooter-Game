@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     <title>Fighter Arena</title>
-    <link rel="stylesheet" href="./src/style.css?v=20260509o" />
+    <link rel="stylesheet" href="./src/style.css?v=20260510k" />
   </head>
   <body>
     <div class="menu-screen" id="menuScreen">
@@ -92,7 +92,31 @@
               still watch for rival players in real time.
             </span>
           </button>
+
+          <button class="mode-card mode-card--arcade" id="miniGamesButton" type="button">
+            <span class="mode-card__tag" id="miniGamesTag">Party</span>
+            <strong id="miniGamesTitle">Mini Games</strong>
+            <span id="miniGamesDescription">
+              Jump into fast solo challenges or open a room and rotate through a full set of party-style mini games with friends.
+            </span>
+          </button>
         </div>
+      </div>
+    </div>
+
+    <div class="room-browser is-hidden" id="miniGameBrowser">
+      <div class="room-browser__panel room-browser__panel--mini-games">
+        <div class="room-browser__header">
+          <div>
+            <p class="eyebrow" id="miniGameBrowserEyebrow">Mini Games</p>
+            <h2 id="miniGameBrowserTitle">Mini Games Hub</h2>
+            <p class="room-browser__summary" id="miniGameBrowserSummary">
+              Pick a fast challenge for solo play, or open a room and bring friends in with public rooms or private codes.
+            </p>
+          </div>
+          <button class="menu-toggle room-browser__close" id="miniGameBrowserCloseButton" type="button">Close</button>
+        </div>
+        <div class="mini-game-grid" id="miniGameGrid"></div>
       </div>
     </div>
 
@@ -128,6 +152,7 @@
                   <select class="room-browser__select" id="roomModeSelect">
                     <option value="pvp">PvP</option>
                     <option value="horde">Zombie Horde</option>
+                    <option value="arcade">Mini Games</option>
                   </select>
                 </label>
                 <label class="room-browser__field">
@@ -138,7 +163,16 @@
                   </select>
                 </label>
               </div>
-              <label class="room-browser__field">
+              <label class="room-browser__field" id="roomMiniGameField" hidden>
+                <span id="roomMiniGameLabel">Mini Game</span>
+                <select class="room-browser__select" id="roomMiniGameSelect">
+                  <option value="sharpshooter">Sharpshooter</option>
+                  <option value="zombie-blitz">Zombie Blitz</option>
+                  <option value="checkpoint-sprint">Checkpoint Sprint</option>
+                  <option value="distance-dash">Distance Dash</option>
+                </select>
+              </label>
+              <label class="room-browser__field" id="roomMinPlayersField">
                 <span id="roomMinPlayersLabel">Horde Start Players</span>
                 <input class="room-browser__input" id="roomMinPlayersInput" type="number" min="1" max="8" value="2" />
               </label>
@@ -207,6 +241,30 @@
         <div class="shop-grid" id="shopGrid"></div>
       </div>
 
+      <div class="social-panel is-hidden" id="socialPanel">
+        <div class="social-panel__header">
+          <div>
+            <p class="eyebrow" id="socialEyebrow">Party</p>
+            <h2 id="socialTitle">Friends And Chat</h2>
+          </div>
+          <button class="menu-toggle social-panel__close" id="socialCloseButton" type="button">Close</button>
+        </div>
+        <div class="social-panel__grid">
+          <section class="social-panel__section">
+            <p class="social-panel__label" id="socialRosterLabel">Leaderboard</p>
+            <div class="social-panel__list" id="socialRosterList"></div>
+          </section>
+          <section class="social-panel__section">
+            <p class="social-panel__label" id="socialChatLabel">Chat</p>
+            <div class="social-panel__chat-log" id="socialChatLog"></div>
+            <div class="social-panel__composer">
+              <input class="room-browser__input social-panel__input" id="socialChatInput" type="text" maxlength="220" placeholder="Say something" />
+              <button class="start-button social-panel__send" id="socialSendButton" type="button">Send</button>
+            </div>
+          </section>
+        </div>
+      </div>
+
       <div class="status" id="statusHud">
         <span id="modeReadout">Mode: Menu</span>
         <span id="healthReadout">Health: --</span>
@@ -231,12 +289,8 @@
       <div class="loadout-bar" id="loadoutBar" aria-label="Weapon Selection"></div>
     </div>
 
-    <button class="menu-toggle screen-fit-hud-button is-hidden" id="screenFitHudButton" type="button">
-      Screen Fit
-    </button>
-
-    <button class="menu-toggle control-fit-hud-button is-hidden" id="controlFitHudButton" type="button">
-      Control Fit
+    <button class="menu-toggle social-hud-button is-hidden" id="socialHudButton" type="button">
+      Party
     </button>
 
     <div class="touch-ui" id="touchUi" hidden>
@@ -256,6 +310,8 @@
         <button class="touch-action" id="touchViewButton" type="button">View</button>
         <button class="touch-action" id="touchPickupButton" type="button">Pick Up</button>
         <button class="touch-action" id="touchWallButton" type="button">Wall</button>
+        <button class="touch-action" id="touchShopButton" type="button">Shop</button>
+        <button class="touch-action" id="touchChatButton" type="button">Chat</button>
       </div>
     </div>
 
@@ -393,6 +449,6 @@
         });
       })();
     </script>
-    <script type="module" src="./src/main.js?v=20260509o"></script>
+    <script type="module" src="./src/main.js?v=20260510k"></script>
   </body>
 </html>

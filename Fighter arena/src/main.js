@@ -54,7 +54,7 @@ function bootstrap() {
     thirdPersonHeight: 1.95,
     thirdPersonAimHeight: 1.15,
     thirdPersonAimFov: 52,
-    slideDrop: 0.88,
+    slideDrop: 2.08,
     slideDropReturn: 10.5,
     slideDropEngage: 18,
   };
@@ -306,6 +306,16 @@ function bootstrap() {
     },
   ];
 
+  function getWeaponConfigByType(type) {
+    const matchType = String(type || "").trim();
+    for (let i = 0; i < LOADOUT.length; i += 1) {
+      if (LOADOUT[i].type === matchType) {
+        return LOADOUT[i];
+      }
+    }
+    return LOADOUT[0];
+  }
+
   const VIEW_POSES = {
     minigun: {
       hipPosition: [0.68, -0.54, -1.1],
@@ -435,6 +445,7 @@ function bootstrap() {
   const MODES = {
     sandbox: "sandbox",
     zombie: "zombie",
+    minigames: "minigames",
     multiplayer: "multiplayer",
   };
 
@@ -479,7 +490,70 @@ function bootstrap() {
   const MULTIPLAYER_VARIANTS = {
     pvp: "pvp",
     horde: "horde",
+    arcade: "arcade",
   };
+
+  const MINI_GAMES = {
+    sharpshooter: {
+      id: "sharpshooter",
+      duration: 45,
+      scoreUnit: "hits",
+      labels: { en: "Sharpshooter", zh: "神射手" },
+      tag: { en: "Aim", zh: "瞄准" },
+      descriptions: {
+        en: "Land as many clean hits as possible before the timer ends.",
+        zh: "在倒计时结束前打出尽可能多的有效命中。",
+      },
+    },
+    "zombie-blitz": {
+      id: "zombie-blitz",
+      duration: 75,
+      scoreUnit: "kills",
+      usesZombies: true,
+      labels: { en: "Zombie Blitz", zh: "僵尸突击" },
+      tag: { en: "Survive", zh: "生存" },
+      descriptions: {
+        en: "Burn down a fast zombie wave and stack the highest kill count.",
+        zh: "顶住快速僵尸潮，在时间内打出最高击杀数。",
+      },
+    },
+    "checkpoint-sprint": {
+      id: "checkpoint-sprint",
+      duration: 90,
+      scoreUnit: "gates",
+      goal: 8,
+      labels: { en: "Checkpoint Sprint", zh: "检查点冲刺" },
+      tag: { en: "Race", zh: "竞速" },
+      descriptions: {
+        en: "Fly through glowing checkpoints and loop the route faster than everyone else.",
+        zh: "穿过发光检查点，用最快节奏循环整条路线。",
+      },
+    },
+    "distance-dash": {
+      id: "distance-dash",
+      duration: 60,
+      scoreUnit: "meters",
+      labels: { en: "Distance Dash", zh: "距离冲刺" },
+      tag: { en: "Run", zh: "跑图" },
+      descriptions: {
+        en: "Sprint, slide, and keep moving to rack up as much distance as you can.",
+        zh: "靠冲刺、滑铲和跑图，把距离尽量刷高。",
+      },
+    },
+  };
+  const DEFAULT_MINI_GAME_ID = "sharpshooter";
+  const MINI_GAME_ORDER = [
+    "sharpshooter",
+    "zombie-blitz",
+    "checkpoint-sprint",
+    "distance-dash",
+  ];
+  const MINI_GAME_CHECKPOINTS = [
+    { x: 34, z: 26 },
+    { x: -44, z: 56 },
+    { x: -62, z: -34 },
+    { x: 60, z: -52 },
+  ];
 
   const CONTROL_SCHEMES = {
     desktop: "desktop",
@@ -502,6 +576,7 @@ function bootstrap() {
       "common.desktop": "Desktop",
       "common.pad": "Mobile",
       "common.screenFit": "Screen Fit",
+      "common.freeMouse": "Show Cursor",
       "menu.eyebrow": "Prototype Build",
       "menu.summary": "Smooth world generation is live. Choose your mode, your controls, and your language before dropping into the arena.",
       "settings.language": "Language",
@@ -532,6 +607,7 @@ function bootstrap() {
       "controlFit.target.loadout": "Loadout Bar",
       "controlFit.target.screenFitButton": "Screen Fit Button",
       "controlFit.target.controlFitButton": "UI Fit Button",
+      "controlFit.target.socialButton": "Party Button",
       "modes.single.tag": "Available",
       "modes.single.title": "Single Player",
       "modes.single.description": "Explore the terrain, swap across a full six-slot loadout, and tear through destructible block targets across the world.",
@@ -544,6 +620,15 @@ function bootstrap() {
       "modes.horde.tag": "New",
       "modes.horde.title": "Multiplayer Horde",
       "modes.horde.description": "Join friends in the same arena, survive shared zombie waves, and still watch for rival players in real time.",
+      "modes.arcade.tag": "Party",
+      "modes.arcade.title": "Mini Games",
+      "modes.arcade.description": "Jump into fast solo challenges or open a room and rotate through a full set of party-style mini games with friends.",
+      "miniGameBrowser.eyebrow": "Mini Games",
+      "miniGameBrowser.title": "Mini Games Hub",
+      "miniGameBrowser.summary": "Pick a fast challenge for solo play, or open a room and bring friends in with public rooms or private codes.",
+      "miniGameBrowser.close": "Close",
+      "miniGameBrowser.solo": "Play Solo",
+      "miniGameBrowser.friends": "With Friends",
       "brand.single.eyebrow": "Single Player",
       "brand.single.summary": "Smooth terrain, reload management, a six-slot loadout, and streamed targets across the world.",
       "brand.zombie.eyebrow": "Zombie Mode",
@@ -553,7 +638,7 @@ function bootstrap() {
       "brand.horde.eyebrow": "Multiplayer Horde",
       "brand.horde.summary": "Team up in a live room, fight shared zombie waves, and still watch for rival players in the same arena.",
       "panel.desktop.line1": "<kbd>WASD</kbd> move, double-tap <kbd>W</kbd> to sprint, <kbd>Shift</kbd> to slide, <kbd>Space</kbd> jump, mouse to look.",
-      "panel.desktop.line2": "<kbd>Mouse 1</kbd> attacks, <kbd>Mouse 2</kbd> aims, <kbd>1-6</kbd> swaps gear, <kbd>R</kbd> reloads guns, <kbd>H</kbd> uses a heal potion, <kbd>Q</kbd> drops your current weapon, <kbd>P</kbd> picks up nearby gear, <kbd>G</kbd> deploys an indestructible wall every 10 seconds, <kbd>B</kbd> opens the shop, and <kbd>V</kbd> swaps first and third person. Press <kbd>Esc</kbd> to pause.",
+      "panel.desktop.line2": "<kbd>Mouse 1</kbd> attacks, <kbd>Mouse 2</kbd> aims, <kbd>1-6</kbd> swaps gear, <kbd>R</kbd> reloads guns, <kbd>H</kbd> uses a heal potion, <kbd>Q</kbd> drops your current weapon, <kbd>F</kbd> picks up nearby gear, <kbd>P</kbd> opens Party, <kbd>G</kbd> deploys an indestructible wall every 10 seconds, <kbd>B</kbd> opens the shop, and <kbd>V</kbd> swaps first and third person. Press <kbd>Esc</kbd> to pause.",
       "panel.pad.line1": "Use the left joystick to move and the right look zone to aim. Hold Sprint to run, tap Slide to slide, and use the mobile buttons to fire, aim, jump, reload, heal, pick up gear, place walls, and swap view.",
       "panel.pad.line2": "The bottom weapon bar still works in Mobile mode, and the top button will pause or resume your run whenever you need a break.",
       "buttons.resume": "Resume Mission",
@@ -572,6 +657,8 @@ function bootstrap() {
       "touch.view": "View",
       "touch.wall": "Wall",
       "touch.pickup": "Pick Up",
+      "touch.shop": "Shop",
+      "touch.chat": "Chat",
       "boot.controlFitPadOnly": "Switch to Mobile controls to adjust the full touch UI and HUD.",
       "boot.multiplayerNotReady": "Multiplayer session is not ready yet.",
       "boot.sessionExpired": "Multiplayer session expired. Rejoin from menu.",
@@ -583,6 +670,7 @@ function bootstrap() {
       "boot.wallPlaced": "Defense wall deployed.",
       "boot.wallCooldown": "Wall ready in {seconds}s.",
       "boot.wallBlocked": "Need a little more open space to place that wall.",
+      "boot.chatUnavailable": "Chat is not ready yet.",
       "prompt.multiplayerName": "Multiplayer name",
       "prompt.shareCode": "Share this room code",
       "roomBrowser.eyebrow": "Rooms",
@@ -596,6 +684,8 @@ function bootstrap() {
       "roomBrowser.mode": "Mode",
       "roomBrowser.modePvp": "PvP",
       "roomBrowser.modeHorde": "Zombie Horde",
+      "roomBrowser.modeArcade": "Mini Games",
+      "roomBrowser.miniGame": "Mini Game",
       "roomBrowser.privacy": "Privacy",
       "roomBrowser.privacyPublic": "Public",
       "roomBrowser.privacyPrivate": "Private",
@@ -613,14 +703,31 @@ function bootstrap() {
       "roomBrowser.players": "{players} players",
       "roomBrowser.waiting": "Waiting {players}/{needed}",
       "roomBrowser.started": "Live",
+      "social.eyebrow": "Party",
+      "social.title": "Friends And Chat",
+      "social.roster": "Leaderboard",
+      "social.chat": "Chat",
+      "social.send": "Send",
+      "social.close": "Close",
+      "social.input": "Say something",
+      "social.emptyRoster": "No friends in this room yet.",
+      "social.emptyChat": "No chat yet. Say hi.",
+      "social.you": "You",
+      "social.privateCode": "Private Code: {code}",
+      "social.roomTitle": "{title} · {room}",
+      "social.pvp": "{kills} K / {deaths} D",
+      "social.horde": "{zombieKills} zombie / {kills} PvP",
+      "social.arcade": "{score} pts • {progress}",
       "loadout.scope": "Scope {zoom}",
       "loadout.dropped": "Dropped",
       "loadout.melee": "Melee",
       "status.modeMenu": "Mode: Menu",
       "status.modePrefix.single": "Single Player ",
       "status.modePrefix.zombie": "Zombie Mode ",
+      "status.modePrefix.minigames": "Mini Games ",
       "status.modePrefix.pvp": "Multiplayer PvP ",
       "status.modePrefix.horde": "Multiplayer Horde ",
+      "status.modePrefix.arcade": "Mini Games Room ",
       "status.downed": "Downed",
       "status.reloading": "Reloading",
       "status.aiming": "Aiming",
@@ -658,6 +765,7 @@ function bootstrap() {
       "common.desktop": "电脑",
       "common.pad": "手机模式",
       "common.screenFit": "屏幕适配",
+      "common.freeMouse": "显示光标",
       "menu.eyebrow": "原型版本",
       "menu.summary": "地形生成已经可用了。现在你可以先选模式、设备操作方式和语言，再进入战场。",
       "settings.language": "语言",
@@ -688,6 +796,7 @@ function bootstrap() {
       "controlFit.target.loadout": "物品栏",
       "controlFit.target.screenFitButton": "屏幕适配按钮",
       "controlFit.target.controlFitButton": "界面调试按钮",
+      "controlFit.target.socialButton": "组队按钮",
       "modes.single.tag": "可用",
       "modes.single.title": "单人模式",
       "modes.single.description": "探索地形，切换六个武器栏位，并在整个世界里破坏方块目标。",
@@ -700,6 +809,15 @@ function bootstrap() {
       "modes.horde.tag": "新增",
       "modes.horde.title": "多人尸潮",
       "modes.horde.description": "和朋友进入同一个房间，一起打共享僵尸，同时还能提防其他玩家。",
+      "modes.arcade.tag": "派对",
+      "modes.arcade.title": "小游戏",
+      "modes.arcade.description": "直接进入一组快节奏小游戏。你可以自己玩，也可以开房间和朋友一起比。",
+      "miniGameBrowser.eyebrow": "小游戏",
+      "miniGameBrowser.title": "小游戏大厅",
+      "miniGameBrowser.summary": "先选一个挑战。你可以自己单人开，也可以开公开房或私人房，和朋友一起玩。",
+      "miniGameBrowser.close": "关闭",
+      "miniGameBrowser.solo": "单人开始",
+      "miniGameBrowser.friends": "和朋友玩",
       "brand.single.eyebrow": "单人模式",
       "brand.single.summary": "平滑地形、换弹管理、六栏武器组，以及持续加载的战场目标。",
       "brand.zombie.eyebrow": "僵尸模式",
@@ -709,7 +827,7 @@ function bootstrap() {
       "brand.horde.eyebrow": "多人尸潮",
       "brand.horde.summary": "进入实时房间，一起打共享僵尸潮，同时也要注意其他玩家的威胁。",
       "panel.desktop.line1": "<kbd>WASD</kbd> 移动，双击 <kbd>W</kbd> 加速，<kbd>Shift</kbd> 滑铲，<kbd>Space</kbd> 跳跃，鼠标控制视角。",
-      "panel.desktop.line2": "<kbd>Mouse 1</kbd> 攻击，<kbd>Mouse 2</kbd> 瞄准，<kbd>1-6</kbd> 切换武器，<kbd>R</kbd> 换弹，<kbd>H</kbd> 使用回血药水，<kbd>Q</kbd> 丢下当前武器，<kbd>P</kbd> 拾取附近武器，<kbd>G</kbd> 每 10 秒搭一个打不坏的墙，<kbd>B</kbd> 打开商店，<kbd>V</kbd> 切换第一/第三人称。按 <kbd>Esc</kbd> 暂停。",
+      "panel.desktop.line2": "<kbd>Mouse 1</kbd> 攻击，<kbd>Mouse 2</kbd> 瞄准，<kbd>1-6</kbd> 切换武器，<kbd>R</kbd> 换弹，<kbd>H</kbd> 使用回血药水，<kbd>Q</kbd> 丢下当前武器，<kbd>F</kbd> 拾取附近武器，<kbd>P</kbd> 打开组队，<kbd>G</kbd> 每 10 秒搭一个打不坏的墙，<kbd>B</kbd> 打开商店，<kbd>V</kbd> 切换第一/第三人称。按 <kbd>Esc</kbd> 暂停。",
       "panel.pad.line1": "左边摇杆移动，右边触控区域转视角。按住冲刺按钮可以加速，点滑铲按钮可以滑铲，其他手机按钮可以开火、瞄准、跳跃、换弹、回血、拾取地上武器、搭墙和切换视角。",
       "panel.pad.line2": "手机模式下底部武器栏也能直接点，顶部按钮可以随时暂停或继续。",
       "buttons.resume": "继续任务",
@@ -728,6 +846,8 @@ function bootstrap() {
       "touch.view": "视角",
       "touch.wall": "墙",
       "touch.pickup": "拾取",
+      "touch.shop": "商店",
+      "touch.chat": "聊天",
       "boot.multiplayerNotReady": "多人会话还没准备好。",
       "boot.sessionExpired": "多人会话已过期，请回到菜单重新进入。",
       "boot.unavailable": "多人不可用，请确认 /api 服务正在运行。",
@@ -738,6 +858,7 @@ function bootstrap() {
       "boot.wallPlaced": "防御墙已放下。",
       "boot.wallCooldown": "墙还要 {seconds}s 才能再放。",
       "boot.wallBlocked": "这里空间不够，放不了这堵墙。",
+      "boot.chatUnavailable": "聊天现在还不能用。",
       "prompt.multiplayerName": "多人名字",
       "prompt.shareCode": "复制这个房间码",
       "roomBrowser.eyebrow": "房间",
@@ -751,6 +872,8 @@ function bootstrap() {
       "roomBrowser.mode": "模式",
       "roomBrowser.modePvp": "PvP",
       "roomBrowser.modeHorde": "僵尸模式",
+      "roomBrowser.modeArcade": "小游戏",
+      "roomBrowser.miniGame": "小游戏",
       "roomBrowser.privacy": "可见性",
       "roomBrowser.privacyPublic": "公开",
       "roomBrowser.privacyPrivate": "私人",
@@ -768,14 +891,31 @@ function bootstrap() {
       "roomBrowser.players": "{players} 人",
       "roomBrowser.waiting": "等待 {players}/{needed}",
       "roomBrowser.started": "进行中",
+      "social.eyebrow": "组队",
+      "social.title": "好友排行和聊天",
+      "social.roster": "好友排行",
+      "social.chat": "聊天",
+      "social.send": "发送",
+      "social.close": "关闭",
+      "social.input": "说点什么",
+      "social.emptyRoster": "这个房间里还没有其他人。",
+      "social.emptyChat": "还没有聊天，先打个招呼吧。",
+      "social.you": "你",
+      "social.privateCode": "私人邀请码：{code}",
+      "social.roomTitle": "{title} · {room}",
+      "social.pvp": "{kills} 杀 / {deaths} 死",
+      "social.horde": "{zombieKills} 僵尸 / {kills} PvP",
+      "social.arcade": "{score} 分 • {progress}",
       "loadout.scope": "镜 {zoom}",
       "loadout.dropped": "已丢下",
       "loadout.melee": "近战",
       "status.modeMenu": "模式：菜单",
       "status.modePrefix.single": "单人 ",
       "status.modePrefix.zombie": "僵尸模式 ",
+      "status.modePrefix.minigames": "小游戏 ",
       "status.modePrefix.pvp": "多人 PvP ",
       "status.modePrefix.horde": "多人尸潮 ",
+      "status.modePrefix.arcade": "小游戏房间 ",
       "status.downed": "倒地",
       "status.reloading": "换弹中",
       "status.aiming": "瞄准中",
@@ -829,6 +969,7 @@ function bootstrap() {
   const zombieModeButton = document.getElementById("zombieModeButton");
   const multiplayerPvpButton = document.getElementById("multiplayerPvpButton");
   const multiplayerHordeButton = document.getElementById("multiplayerHordeButton");
+  const miniGamesButton = document.getElementById("miniGamesButton");
   const singlePlayerTag = document.getElementById("singlePlayerTag");
   const singlePlayerTitle = document.getElementById("singlePlayerTitle");
   const singlePlayerDescription = document.getElementById("singlePlayerDescription");
@@ -841,6 +982,15 @@ function bootstrap() {
   const multiplayerHordeTag = document.getElementById("multiplayerHordeTag");
   const multiplayerHordeTitle = document.getElementById("multiplayerHordeTitle");
   const multiplayerHordeDescription = document.getElementById("multiplayerHordeDescription");
+  const miniGamesTag = document.getElementById("miniGamesTag");
+  const miniGamesTitle = document.getElementById("miniGamesTitle");
+  const miniGamesDescription = document.getElementById("miniGamesDescription");
+  const miniGameBrowser = document.getElementById("miniGameBrowser");
+  const miniGameBrowserEyebrow = document.getElementById("miniGameBrowserEyebrow");
+  const miniGameBrowserTitle = document.getElementById("miniGameBrowserTitle");
+  const miniGameBrowserSummary = document.getElementById("miniGameBrowserSummary");
+  const miniGameBrowserCloseButton = document.getElementById("miniGameBrowserCloseButton");
+  const miniGameGrid = document.getElementById("miniGameGrid");
   const roomBrowser = document.getElementById("roomBrowser");
   const roomBrowserEyebrow = document.getElementById("roomBrowserEyebrow");
   const roomBrowserTitle = document.getElementById("roomBrowserTitle");
@@ -855,6 +1005,10 @@ function bootstrap() {
   const roomModeSelect = document.getElementById("roomModeSelect");
   const roomPrivacyLabel = document.getElementById("roomPrivacyLabel");
   const roomPrivacySelect = document.getElementById("roomPrivacySelect");
+  const roomMiniGameField = document.getElementById("roomMiniGameField");
+  const roomMiniGameLabel = document.getElementById("roomMiniGameLabel");
+  const roomMiniGameSelect = document.getElementById("roomMiniGameSelect");
+  const roomMinPlayersField = document.getElementById("roomMinPlayersField");
   const roomMinPlayersLabel = document.getElementById("roomMinPlayersLabel");
   const roomMinPlayersInput = document.getElementById("roomMinPlayersInput");
   const roomCreateButton = document.getElementById("roomCreateButton");
@@ -875,6 +1029,16 @@ function bootstrap() {
   const shopEyebrow = document.getElementById("shopEyebrow");
   const shopTitle = document.getElementById("shopTitle");
   const shopSummary = document.getElementById("shopSummary");
+  const socialPanel = document.getElementById("socialPanel");
+  const socialEyebrow = document.getElementById("socialEyebrow");
+  const socialTitle = document.getElementById("socialTitle");
+  const socialCloseButton = document.getElementById("socialCloseButton");
+  const socialRosterLabel = document.getElementById("socialRosterLabel");
+  const socialRosterList = document.getElementById("socialRosterList");
+  const socialChatLabel = document.getElementById("socialChatLabel");
+  const socialChatLog = document.getElementById("socialChatLog");
+  const socialChatInput = document.getElementById("socialChatInput");
+  const socialSendButton = document.getElementById("socialSendButton");
   const startButton = document.getElementById("startButton");
   const screenFitPauseButton = document.getElementById("screenFitPauseButton");
   const controlFitPauseButton = document.getElementById("controlFitPauseButton");
@@ -907,8 +1071,9 @@ function bootstrap() {
   const touchViewButton = document.getElementById("touchViewButton");
   const touchWallButton = document.getElementById("touchWallButton");
   const touchPickupButton = document.getElementById("touchPickupButton");
-  const screenFitHudButton = document.getElementById("screenFitHudButton");
-  const controlFitHudButton = document.getElementById("controlFitHudButton");
+  const touchShopButton = document.getElementById("touchShopButton");
+  const touchChatButton = document.getElementById("touchChatButton");
+  const socialHudButton = document.getElementById("socialHudButton");
   const screenFitEditor = document.getElementById("screenFitEditor");
   const screenFitEyebrow = document.getElementById("screenFitEyebrow");
   const screenFitTitle = document.getElementById("screenFitTitle");
@@ -1045,6 +1210,7 @@ function bootstrap() {
   const explosionRoot = new THREE.Group();
   const pickupRoot = new THREE.Group();
   const zombieRoot = new THREE.Group();
+  const miniGameRoot = new THREE.Group();
   const remotePlayerRoot = new THREE.Group();
   scene.add(terrainRoot);
   scene.add(blockRoot);
@@ -1056,6 +1222,7 @@ function bootstrap() {
   scene.add(explosionRoot);
   scene.add(pickupRoot);
   scene.add(zombieRoot);
+  scene.add(miniGameRoot);
   scene.add(remotePlayerRoot);
 
   const viewWeapons = LOADOUT.map(function (weaponConfig) {
@@ -1064,6 +1231,20 @@ function bootstrap() {
     camera.add(model.group);
     return model;
   });
+  const miniGameDistanceSample = new THREE.Vector3();
+  const miniGameCheckpointGeometry = new THREE.TorusGeometry(3.2, 0.18, 10, 40);
+  const miniGameCheckpointBeamGeometry = new THREE.CylinderGeometry(0.16, 0.3, 7.4, 8, 1, true);
+  const miniGameCheckpointMaterial = new THREE.MeshBasicMaterial({
+    color: 0x85f3ff,
+    transparent: true,
+    opacity: 0.92,
+  });
+  const miniGameCheckpointIdleMaterial = new THREE.MeshBasicMaterial({
+    color: 0xffd37a,
+    transparent: true,
+    opacity: 0.52,
+  });
+  const miniGameCheckpoints = [];
   const playerAvatar = createPlayerAvatar();
   const avatarWeapons = LOADOUT.map(function (weaponConfig) {
     const model = createWeaponModel(weaponConfig.type, true);
@@ -1228,9 +1409,28 @@ function bootstrap() {
   let multiplayerRoomMinPlayers = 1;
   let multiplayerRoomPlayerCount = 0;
   let multiplayerRoomWaitingForPlayers = 0;
+  let multiplayerRoomMiniGame = "";
+  let multiplayerRoomMiniGameEndsAt = 0;
+  let multiplayerRoomMiniGameDuration = 0;
+  let multiplayerRoomLeaderboard = [];
+  let miniGameBrowserOpen = false;
   let roomBrowserOpen = false;
   let roomBrowserRooms = [];
   let roomBrowserPreferredVariant = MULTIPLAYER_VARIANTS.pvp;
+  let roomBrowserPreferredMiniGame = DEFAULT_MINI_GAME_ID;
+  let activeMiniGameId = DEFAULT_MINI_GAME_ID;
+  let miniGameScore = 0;
+  let miniGameProgressText = "";
+  let miniGameEndsAt = 0;
+  let miniGameDistanceMeters = 0;
+  let miniGameBaselineHits = 0;
+  let miniGameBaselineZombieKills = 0;
+  let miniGameCheckpointIndex = 0;
+  let miniGameCompleteAnnounced = false;
+  let socialPanelOpen = false;
+  let multiplayerRoster = [];
+  let multiplayerChat = [];
+  let multiplayerChatLastId = 0;
   let healingPotionReadyAt = 0;
   let wallBuildReadyAt = 0;
   let defenseWallSerial = 0;
@@ -1283,6 +1483,28 @@ function bootstrap() {
   let screenFitShouldResume = false;
   const CONTROL_LAYOUT_STORAGE_KEY = "fighterArena.controlLayout.v1";
   const CONTROL_LAYOUT_DEFAULTS = {
+    desktop: {
+      joystick: { x: 0.12, y: 0.76, size: 1 },
+      fire: { x: 0.84, y: 0.14, size: 1 },
+      aim: { x: 0.94, y: 0.14, size: 1 },
+      jump: { x: 0.84, y: 0.27, size: 1 },
+      reload: { x: 0.94, y: 0.27, size: 1 },
+      heal: { x: 0.84, y: 0.4, size: 1 },
+      view: { x: 0.94, y: 0.4, size: 1 },
+      wall: { x: 0.84, y: 0.53, size: 1 },
+      pickup: { x: 0.94, y: 0.53, size: 1 },
+      shop: { x: 0.84, y: 0.79, size: 1 },
+      chat: { x: 0.94, y: 0.79, size: 1 },
+      sprint: { x: 0.84, y: 0.66, size: 1 },
+      slide: { x: 0.94, y: 0.66, size: 1 },
+      screenFitButton: { x: 0.95, y: 0.06, size: 1 },
+      controlFitButton: { x: 0.89, y: 0.06, size: 1 },
+      socialButton: { x: 0.83, y: 0.06, size: 1 },
+      status: { x: 0.24, y: 0.84, size: 0.92 },
+      sprintMeter: { x: 0.12, y: 0.4, size: 0.92 },
+      coords: { x: 0.28, y: 0.67, size: 1 },
+      loadout: { x: 0.61, y: 0.94, size: 0.9 },
+    },
     pad: {
       joystick: { x: 0.12, y: 0.76, size: 1 },
       fire: { x: 0.84, y: 0.14, size: 1 },
@@ -1293,10 +1515,13 @@ function bootstrap() {
       view: { x: 0.94, y: 0.4, size: 1 },
       wall: { x: 0.84, y: 0.53, size: 1 },
       pickup: { x: 0.94, y: 0.53, size: 1 },
+      shop: { x: 0.84, y: 0.79, size: 1 },
+      chat: { x: 0.94, y: 0.79, size: 1 },
       sprint: { x: 0.84, y: 0.66, size: 1 },
       slide: { x: 0.94, y: 0.66, size: 1 },
       screenFitButton: { x: 0.78, y: 0.12, size: 1 },
       controlFitButton: { x: 0.9, y: 0.12, size: 1 },
+      socialButton: { x: 0.66, y: 0.12, size: 1 },
       status: { x: 0.32, y: 0.1, size: 1 },
       sprintMeter: { x: 0.26, y: 0.2, size: 1 },
       coords: { x: 0.14, y: 0.84, size: 1 },
@@ -1321,10 +1546,11 @@ function bootstrap() {
     view: { element: touchViewButton, type: "button", baseWidth: 82, baseHeight: 50, minScale: 0.72, maxScale: 1.7, labelKey: "touch.view" },
     wall: { element: touchWallButton, type: "button", baseWidth: 82, baseHeight: 50, minScale: 0.72, maxScale: 1.7, labelKey: "touch.wall" },
     pickup: { element: touchPickupButton, type: "button", baseWidth: 82, baseHeight: 50, minScale: 0.72, maxScale: 1.7, labelKey: "touch.pickup" },
+    shop: { element: touchShopButton, type: "button", baseWidth: 82, baseHeight: 50, minScale: 0.72, maxScale: 1.7, labelKey: "touch.shop" },
+    chat: { element: touchChatButton, type: "button", baseWidth: 82, baseHeight: 50, minScale: 0.72, maxScale: 1.7, labelKey: "touch.chat" },
     sprint: { element: touchSprintButton, type: "button", baseWidth: 82, baseHeight: 50, minScale: 0.72, maxScale: 1.7, labelKey: "touch.sprint" },
     slide: { element: touchSlideButton, type: "button", baseWidth: 82, baseHeight: 50, minScale: 0.72, maxScale: 1.7, labelKey: "touch.slide" },
-    screenFitButton: { element: screenFitHudButton, type: "button", baseWidth: 92, baseHeight: 34, minScale: 0.74, maxScale: 1.8, labelKey: "controlFit.target.screenFitButton" },
-    controlFitButton: { element: controlFitHudButton, type: "button", baseWidth: 84, baseHeight: 34, minScale: 0.74, maxScale: 1.8, labelKey: "controlFit.target.controlFitButton" },
+    socialButton: { element: socialHudButton, type: "button", baseWidth: 84, baseHeight: 34, minScale: 0.74, maxScale: 1.8, labelKey: "controlFit.target.socialButton" },
     status: { element: statusHud, type: "hud", baseWidth: 620, baseHeight: 96, minScale: 0.58, maxScale: 1.6, labelKey: "controlFit.target.status", widthFraction: 0.9, maxWidth: 860 },
     sprintMeter: { element: sprintMeter, type: "hud", baseWidth: 320, baseHeight: 64, minScale: 0.58, maxScale: 1.7, labelKey: "controlFit.target.sprintMeter", widthFraction: 0.62, maxWidth: 420 },
     coords: { element: coordsReadout, type: "hud", baseWidth: 176, baseHeight: 42, minScale: 0.6, maxScale: 1.8, labelKey: "controlFit.target.coords" },
@@ -1554,7 +1780,6 @@ function bootstrap() {
     screenFitLabel.textContent = t("settings.screenFit");
     screenFitOpenButton.textContent = t("screenFit.open");
     screenFitPauseButton.textContent = t("common.screenFit");
-    screenFitHudButton.textContent = t("common.screenFit");
     screenFitEyebrow.textContent = t("settings.screenFit");
     screenFitTitle.textContent = t("screenFit.title");
     screenFitSummary.textContent = t("screenFit.summary");
@@ -1565,10 +1790,15 @@ function bootstrap() {
       : t("screenFit.frame.desktop");
   }
 
-  function cloneControlLayoutProfile(profile) {
+  function getControlLayoutProfileKey() {
+    return selectedControlScheme === CONTROL_SCHEMES.pad ? "pad" : "desktop";
+  }
+
+  function cloneControlLayoutProfile(profile, modeKey) {
     const next = {};
+    const resolvedModeKey = modeKey === "pad" ? "pad" : "desktop";
     Object.keys(CONTROL_LAYOUT_CONFIG).forEach(function (key) {
-      const defaults = CONTROL_LAYOUT_DEFAULTS.pad[key];
+      const defaults = CONTROL_LAYOUT_DEFAULTS[resolvedModeKey][key];
       const source = profile && profile[key] ? profile[key] : defaults;
       next[key] = {
         x: Number(source && source.x),
@@ -1588,8 +1818,8 @@ function bootstrap() {
     return next;
   }
 
-  function sanitizeControlLayoutProfile(profile) {
-    const next = cloneControlLayoutProfile(profile);
+  function sanitizeControlLayoutProfile(profile, modeKey) {
+    const next = cloneControlLayoutProfile(profile, modeKey);
     Object.keys(CONTROL_LAYOUT_CONFIG).forEach(function (key) {
       const config = CONTROL_LAYOUT_CONFIG[key];
       next[key].x = THREE.MathUtils.clamp(next[key].x, 0.04, 0.96);
@@ -1609,7 +1839,8 @@ function bootstrap() {
     }
 
     return {
-      pad: sanitizeControlLayoutProfile(parsed && parsed.pad ? parsed.pad : CONTROL_LAYOUT_DEFAULTS.pad),
+      desktop: sanitizeControlLayoutProfile(parsed && parsed.desktop ? parsed.desktop : CONTROL_LAYOUT_DEFAULTS.desktop, "desktop"),
+      pad: sanitizeControlLayoutProfile(parsed && parsed.pad ? parsed.pad : CONTROL_LAYOUT_DEFAULTS.pad, "pad"),
     };
   }
 
@@ -1622,7 +1853,8 @@ function bootstrap() {
   }
 
   function getCurrentControlLayoutProfile() {
-    return controlLayoutProfiles.pad || sanitizeControlLayoutProfile(CONTROL_LAYOUT_DEFAULTS.pad);
+    const key = getControlLayoutProfileKey();
+    return controlLayoutProfiles[key] || sanitizeControlLayoutProfile(CONTROL_LAYOUT_DEFAULTS[key], key);
   }
 
   function getControlFitTargetName(key) {
@@ -1637,14 +1869,15 @@ function bootstrap() {
         controlFitEditorOpen && key === controlFitSelectedKey
       );
     });
-    controlFitSelectedLabel.textContent = "";
+    controlFitSelectedLabel.textContent = controlFitEditorOpen
+      ? getControlFitTargetName(controlFitSelectedKey)
+      : "";
   }
 
   function updateControlFitCopy() {
     controlFitLabel.textContent = t("settings.controlFit");
     controlFitOpenButton.textContent = t("controlFit.open");
     controlFitPauseButton.textContent = t("common.controlFit");
-    controlFitHudButton.textContent = t("common.controlFit");
     controlFitEyebrow.textContent = "";
     controlFitTitle.textContent = "";
     controlFitSummary.textContent = "";
@@ -1670,7 +1903,8 @@ function bootstrap() {
 
   function getControlLayoutBounds(key, frame, profile) {
     const config = CONTROL_LAYOUT_CONFIG[key];
-    const layout = profile[key] || CONTROL_LAYOUT_DEFAULTS.pad[key];
+    const modeKey = getControlLayoutProfileKey();
+    const layout = profile[key] || CONTROL_LAYOUT_DEFAULTS[modeKey][key];
     const size = THREE.MathUtils.clamp(layout.size, config.minScale, config.maxScale);
     const baseWidth = getControlLayoutBaseWidth(config, frame);
     const baseHeight = getControlLayoutBaseHeight(config, frame);
@@ -1744,7 +1978,8 @@ function bootstrap() {
   }
 
   function updateCurrentControlLayoutProfile(profile, persist) {
-    controlLayoutProfiles.pad = sanitizeControlLayoutProfile(profile);
+    const key = getControlLayoutProfileKey();
+    controlLayoutProfiles[key] = sanitizeControlLayoutProfile(profile, key);
     if (persist !== false) {
       saveControlLayoutProfiles();
     }
@@ -1760,10 +1995,6 @@ function bootstrap() {
   }
 
   function openControlFitEditor() {
-    if (selectedControlScheme !== CONTROL_SCHEMES.pad) {
-      setBootMessage(t("boot.controlFitPadOnly"));
-      return;
-    }
     if (controlFitEditorOpen) {
       return;
     }
@@ -1775,7 +2006,11 @@ function bootstrap() {
     controlFitEditorOpen = true;
     controlFitEditor.hidden = false;
     controlFitDragState = null;
-    selectControlFitTarget(controlFitSelectedKey);
+    const defaultDesktopTarget = ["status", "loadout", "coords", "sprintMeter", "socialButton"];
+    const nextTarget = selectedControlScheme === CONTROL_SCHEMES.pad
+      ? controlFitSelectedKey
+      : (defaultDesktopTarget.includes(controlFitSelectedKey) ? controlFitSelectedKey : "status");
+    selectControlFitTarget(nextTarget);
 
     if (document.pointerLockElement === renderer.domElement) {
       document.exitPointerLock();
@@ -1789,6 +2024,11 @@ function bootstrap() {
 
     updateControlFitCopy();
     applyControlLayout();
+    setBootMessage(
+      selectedControlScheme === CONTROL_SCHEMES.desktop
+        ? "UI Fit: drag the selected UI, use [ ] to resize, arrows to switch, Enter/Esc to close."
+        : ""
+    );
   }
 
   function closeControlFitEditor(options) {
@@ -1801,11 +2041,17 @@ function bootstrap() {
     controlFitEditorOpen = false;
     controlFitEditor.hidden = true;
     controlFitDragState = null;
+    setBootMessage("");
     refreshSessionChrome();
     updateControlFitSelectionState();
 
-    if (shouldResume && controlFitShouldResume && singlePlayerStarted && selectedControlScheme === CONTROL_SCHEMES.pad) {
-      setPlayingState(true);
+    if (
+      shouldResume &&
+      controlFitShouldResume &&
+      singlePlayerStarted &&
+      selectedControlScheme === CONTROL_SCHEMES.pad
+    ) {
+      requestWorldPointerLock();
     }
 
     controlFitShouldResume = false;
@@ -1875,6 +2121,23 @@ function bootstrap() {
       config.maxScale
     );
     updateCurrentControlLayoutProfile(next);
+  }
+
+  function cycleDesktopControlFitTarget(direction) {
+    if (!controlFitEditorOpen || selectedControlScheme !== CONTROL_SCHEMES.desktop) {
+      return;
+    }
+    const desktopTargets = [
+      "status",
+      "sprintMeter",
+      "coords",
+      "loadout",
+      "socialButton",
+    ];
+    const currentIndex = Math.max(0, desktopTargets.indexOf(controlFitSelectedKey));
+    const nextIndex =
+      (currentIndex + direction + desktopTargets.length) % desktopTargets.length;
+    selectControlFitTarget(desktopTargets[nextIndex]);
   }
 
   function updateCurrentScreenFitProfile(profile, persist) {
@@ -2007,18 +2270,29 @@ function bootstrap() {
     document.body.classList.toggle("is-playing", pointerLocked);
     document.body.classList.toggle("is-screen-fit-editing", screenFitEditorOpen);
     document.body.classList.toggle("is-control-fit-editing", controlFitEditorOpen);
-    panel.classList.toggle("is-hidden", pointerLocked || !singlePlayerStarted || screenFitEditorOpen || controlFitEditorOpen);
+    document.body.classList.toggle("is-social-open", socialPanelOpen);
+    const panelVisible =
+      !pointerLocked &&
+      singlePlayerStarted &&
+      !screenFitEditorOpen &&
+      !controlFitEditorOpen &&
+      !socialPanelOpen;
+    document.body.classList.toggle("is-panel-open", panelVisible);
+    panel.classList.toggle("is-hidden", !panelVisible);
     const padScheme = selectedControlScheme === CONTROL_SCHEMES.pad;
     const padVisible = singlePlayerStarted && padScheme;
-    const controlEditorActive = controlFitEditorOpen && padScheme;
-    const mobileControlsActive = padVisible && !screenFitEditorOpen && !controlFitEditorOpen;
-    const showTouchUi = mobileControlsActive || controlEditorActive;
+    const controlEditorActive = controlFitEditorOpen;
+    const mobileControlsActive = padVisible && !screenFitEditorOpen && !controlFitEditorOpen && !socialPanelOpen;
+    const showTouchUi = mobileControlsActive || (controlEditorActive && padScheme);
     touchUi.hidden = !showTouchUi;
     touchUi.classList.toggle("is-active", showTouchUi);
     document.body.classList.toggle("is-mobile-controls", showTouchUi);
-    const fitButtonsVisible = singlePlayerStarted && padScheme && !screenFitEditorOpen;
-    screenFitHudButton.classList.toggle("is-hidden", !fitButtonsVisible);
-    controlFitHudButton.classList.toggle("is-hidden", !fitButtonsVisible);
+    const socialVisible =
+      singlePlayerStarted &&
+      !screenFitEditorOpen &&
+      !controlFitEditorOpen &&
+      !socialPanelOpen;
+    socialHudButton.classList.toggle("is-hidden", !socialVisible);
   }
 
   function setPlayingState(active) {
@@ -2052,6 +2326,51 @@ function bootstrap() {
       : t("panel.desktop.line2");
   }
 
+  function getMiniGameConfig(miniGameId) {
+    return MINI_GAMES[miniGameId] || MINI_GAMES[DEFAULT_MINI_GAME_ID];
+  }
+
+  function getLocalizedMiniGameLabel(miniGameId) {
+    const config = getMiniGameConfig(miniGameId);
+    return config.labels[selectedLanguage] || config.labels.en;
+  }
+
+  function getLocalizedMiniGameDescription(miniGameId) {
+    const config = getMiniGameConfig(miniGameId);
+    return config.descriptions[selectedLanguage] || config.descriptions.en;
+  }
+
+  function getLocalizedMiniGameTag(miniGameId) {
+    const config = getMiniGameConfig(miniGameId);
+    return config.tag[selectedLanguage] || config.tag.en;
+  }
+
+  function isSoloMiniGameMode() {
+    return currentMode === MODES.minigames && Boolean(activeMiniGameId);
+  }
+
+  function isMultiplayerMiniGameRoom() {
+    return currentMode === MODES.multiplayer && multiplayerVariant === MULTIPLAYER_VARIANTS.arcade && Boolean(multiplayerRoomMiniGame);
+  }
+
+  function getActiveMiniGameId() {
+    if (multiplayerVariant === MULTIPLAYER_VARIANTS.arcade && multiplayerRoomMiniGame) {
+      return multiplayerRoomMiniGame;
+    }
+    if (currentMode === MODES.minigames && activeMiniGameId) {
+      return activeMiniGameId;
+    }
+    return "";
+  }
+
+  function activeMiniGameUsesZombies() {
+    const miniGameId = getActiveMiniGameId();
+    if (!miniGameId) {
+      return false;
+    }
+    return Boolean(getMiniGameConfig(miniGameId).usesZombies);
+  }
+
   function resetMultiplayerRoomInfo() {
     multiplayerRoomId = "";
     multiplayerRoomName = "";
@@ -2061,6 +2380,17 @@ function bootstrap() {
     multiplayerRoomMinPlayers = 1;
     multiplayerRoomPlayerCount = 0;
     multiplayerRoomWaitingForPlayers = 0;
+    multiplayerRoomMiniGame = "";
+    multiplayerRoomMiniGameEndsAt = 0;
+    multiplayerRoomMiniGameDuration = 0;
+    multiplayerRoomLeaderboard = [];
+    multiplayerRoster = [];
+    multiplayerChat = [];
+    multiplayerChatLastId = 0;
+    miniGameScore = 0;
+    miniGameProgressText = "";
+    miniGameEndsAt = 0;
+    renderSocialPanel();
   }
 
   function applyMultiplayerRoomInfo(roomInfo, options) {
@@ -2073,6 +2403,18 @@ function bootstrap() {
     multiplayerRoomName = String(roomInfo.name || multiplayerRoomName || "");
     multiplayerRoomCode = String(roomInfo.code || multiplayerRoomCode || "");
     multiplayerRoomPrivate = Boolean(roomInfo.private);
+    multiplayerRoomMiniGame = String(roomInfo.miniGame || multiplayerRoomMiniGame || "");
+    multiplayerRoomMiniGameEndsAt = Number.isFinite(Number(roomInfo.miniGameEndsAt))
+      ? Number(roomInfo.miniGameEndsAt)
+      : multiplayerRoomMiniGameEndsAt;
+    multiplayerRoomMiniGameDuration = Number.isFinite(Number(roomInfo.miniGameDuration))
+      ? Number(roomInfo.miniGameDuration)
+      : multiplayerRoomMiniGameDuration;
+    multiplayerRoomLeaderboard = Array.isArray(roomInfo.leaderboard) ? roomInfo.leaderboard : multiplayerRoomLeaderboard;
+    multiplayerRoster = Array.isArray(roomInfo.roster) ? roomInfo.roster : multiplayerRoster;
+    multiplayerChat = Array.isArray(roomInfo.chat) ? roomInfo.chat : multiplayerChat;
+    multiplayerChatLastId = multiplayerChat.length ? Number(multiplayerChat[multiplayerChat.length - 1].id || multiplayerChatLastId) : multiplayerChatLastId;
+    renderSocialPanel();
     multiplayerRoomMinPlayers = Math.max(
       1,
       Number.isFinite(Number(roomInfo.minPlayers)) ? Number(roomInfo.minPlayers) : multiplayerRoomMinPlayers || 1
@@ -2094,6 +2436,270 @@ function bootstrap() {
     }
   }
 
+  function setMiniGameBrowserOpen(active) {
+    miniGameBrowserOpen = Boolean(active);
+    miniGameBrowser.classList.toggle("is-hidden", !miniGameBrowserOpen);
+  }
+
+  function renderMiniGameBrowser() {
+    miniGameGrid.replaceChildren();
+    MINI_GAME_ORDER.forEach(function (miniGameId) {
+      const config = getMiniGameConfig(miniGameId);
+      const card = document.createElement("article");
+      card.className = "mini-game-card";
+
+      const tag = document.createElement("span");
+      tag.className = "mini-game-card__tag";
+      tag.textContent = getLocalizedMiniGameTag(miniGameId);
+
+      const title = document.createElement("h3");
+      title.className = "mini-game-card__title";
+      title.textContent = getLocalizedMiniGameLabel(miniGameId);
+
+      const description = document.createElement("p");
+      description.className = "mini-game-card__description";
+      description.textContent = getLocalizedMiniGameDescription(miniGameId);
+
+      const meta = document.createElement("p");
+      meta.className = "mini-game-card__meta";
+      meta.textContent = String(config.duration) + (selectedLanguage === LANGUAGES.zh ? " 秒挑战" : " second challenge");
+
+      const buttons = document.createElement("div");
+      buttons.className = "mini-game-card__buttons";
+
+      const soloButton = document.createElement("button");
+      soloButton.type = "button";
+      soloButton.className = "start-button";
+      soloButton.textContent = t("miniGameBrowser.solo");
+      soloButton.addEventListener("click", function () {
+        startSoloMiniGame(miniGameId);
+      });
+
+      const friendsButton = document.createElement("button");
+      friendsButton.type = "button";
+      friendsButton.className = "menu-toggle";
+      friendsButton.textContent = t("miniGameBrowser.friends");
+      friendsButton.addEventListener("click", function () {
+        closeMiniGameBrowser();
+        openRoomBrowser(MULTIPLAYER_VARIANTS.arcade, miniGameId);
+      });
+
+      buttons.append(soloButton, friendsButton);
+      card.append(tag, title, description, meta, buttons);
+      miniGameGrid.append(card);
+    });
+  }
+
+  function openMiniGameBrowser() {
+    renderMiniGameBrowser();
+    setMiniGameBrowserOpen(true);
+  }
+
+  function closeMiniGameBrowser() {
+    setMiniGameBrowserOpen(false);
+  }
+
+  function formatSocialRosterLine(entry) {
+    if (!entry) {
+      return "";
+    }
+    if (multiplayerVariant === MULTIPLAYER_VARIANTS.arcade) {
+      return t("social.arcade", {
+        score: Math.round(Number(entry.miniGameScore || entry.score || 0)),
+        progress: String(entry.miniGameProgress || entry.progress || (selectedLanguage === LANGUAGES.zh ? "进行中" : "Live")),
+      });
+    }
+    if (multiplayerVariant === MULTIPLAYER_VARIANTS.horde) {
+      return t("social.horde", {
+        zombieKills: Number(entry.zombieKills || 0),
+        kills: Number(entry.kills || 0),
+      });
+    }
+    return t("social.pvp", {
+      kills: Number(entry.kills || 0),
+      deaths: Number(entry.deaths || 0),
+    });
+  }
+
+  function buildSoloSocialRoster() {
+    return [
+      {
+        id: "local-player",
+        name: multiplayerPlayerName || t("common.player"),
+        kills: totalHits || 0,
+        deaths: playerIsDead ? 1 : 0,
+        zombieKills: zombieKills || 0,
+        miniGameScore: Math.round(miniGameScore || 0),
+        miniGameProgress: miniGameProgressText || "",
+      },
+    ];
+  }
+
+  function renderSocialPanel() {
+    const multiplayerRoomActive =
+      currentMode === MODES.multiplayer && Boolean(multiplayerPlayerId);
+    const rosterEntries = multiplayerRoomActive ? multiplayerRoster : buildSoloSocialRoster();
+    const chatEntries = multiplayerRoomActive ? multiplayerChat : [];
+
+    socialEyebrow.textContent = multiplayerRoomPrivate && multiplayerRoomCode
+      ? t("social.privateCode", { code: multiplayerRoomCode })
+      : t("social.eyebrow");
+    socialTitle.textContent = multiplayerRoomName
+      ? t("social.roomTitle", { title: t("social.title"), room: multiplayerRoomName })
+      : t("social.title");
+
+    socialRosterList.replaceChildren();
+    socialChatLog.replaceChildren();
+
+    if (!rosterEntries.length) {
+      const emptyRoster = document.createElement("p");
+      emptyRoster.className = "social-panel__empty";
+      emptyRoster.textContent = t("social.emptyRoster");
+      socialRosterList.append(emptyRoster);
+    } else {
+      rosterEntries.forEach(function (entry, index) {
+        const row = document.createElement("div");
+        row.className = "social-player";
+        if (
+          String(entry.id || "") === multiplayerPlayerId ||
+          String(entry.id || "") === "local-player"
+        ) {
+          row.classList.add("is-self");
+        }
+
+        const rank = document.createElement("span");
+        rank.className = "social-player__rank";
+        rank.textContent = "#" + String(index + 1);
+
+        const body = document.createElement("div");
+        body.className = "social-player__body";
+
+        const name = document.createElement("strong");
+        name.className = "social-player__name";
+        name.textContent =
+          String(entry.name || t("common.player")) +
+          (
+            String(entry.id || "") === multiplayerPlayerId ||
+            String(entry.id || "") === "local-player"
+              ? " • " + t("social.you")
+              : ""
+          );
+
+        const meta = document.createElement("span");
+        meta.className = "social-player__meta";
+        meta.textContent = formatSocialRosterLine(entry);
+
+        body.append(name, meta);
+        row.append(rank, body);
+        socialRosterList.append(row);
+      });
+    }
+
+    if (!chatEntries.length) {
+      const emptyChat = document.createElement("p");
+      emptyChat.className = "social-panel__empty";
+      emptyChat.textContent = multiplayerRoomActive
+        ? t("social.emptyChat")
+        : t("boot.chatUnavailable");
+      socialChatLog.append(emptyChat);
+    } else {
+      chatEntries.forEach(function (entry) {
+        const bubble = document.createElement("div");
+        bubble.className = "social-chat-message";
+        if (String(entry.playerId || "") === multiplayerPlayerId) {
+          bubble.classList.add("is-self");
+        }
+        if (entry.system) {
+          bubble.classList.add("is-system");
+        }
+
+        const author = document.createElement("strong");
+        author.className = "social-chat-message__author";
+        author.textContent = entry.system ? "System" : String(entry.name || t("common.player"));
+
+        const body = document.createElement("span");
+        body.className = "social-chat-message__body";
+        body.textContent = String(entry.text || "");
+
+        bubble.append(author, body);
+        socialChatLog.append(bubble);
+      });
+      socialChatLog.scrollTop = socialChatLog.scrollHeight;
+    }
+
+    socialChatInput.disabled = !multiplayerRoomActive;
+    socialSendButton.disabled = !multiplayerRoomActive;
+    socialChatInput.placeholder = multiplayerRoomActive
+      ? t("social.input")
+      : t("boot.chatUnavailable");
+  }
+
+  function closeSocialPanel(options) {
+    const shouldResume = !options || options.resume !== false;
+    if (!socialPanelOpen) {
+      return;
+    }
+    socialPanelOpen = false;
+    socialPanel.classList.add("is-hidden");
+    refreshSessionChrome();
+    if (shouldResume && singlePlayerStarted && selectedControlScheme === CONTROL_SCHEMES.pad) {
+      requestWorldPointerLock();
+    }
+  }
+
+  function openSocialPanel() {
+    socialPanelOpen = true;
+    socialPanel.classList.remove("is-hidden");
+    renderSocialPanel();
+    if (document.pointerLockElement === renderer.domElement && typeof document.exitPointerLock === "function") {
+      document.exitPointerLock();
+    } else {
+      setPlayingState(false);
+    }
+    refreshSessionChrome();
+    socialChatInput.focus();
+  }
+
+  function toggleSocialPanel() {
+    if (socialPanelOpen) {
+      closeSocialPanel();
+    } else {
+      openSocialPanel();
+    }
+  }
+
+  async function sendSocialChatMessage() {
+    if (!multiplayerPlayerId) {
+      setBootMessage(t("boot.chatUnavailable"));
+      return;
+    }
+    const message = String(socialChatInput.value || "").trim();
+    if (!message) {
+      return;
+    }
+    socialSendButton.disabled = true;
+    try {
+      const response = await fetch("/api/multiplayer/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ playerId: multiplayerPlayerId, message: message }),
+      });
+      if (!response.ok) {
+        throw new Error("chat failed with status " + response.status);
+      }
+      const payload = await response.json();
+      socialChatInput.value = "";
+      if (payload.room) {
+        applyMultiplayerRoomInfo(payload.room);
+      }
+    } catch (error) {
+      console.warn("Chat send failed", error);
+      setBootMessage(t("boot.chatUnavailable"));
+    } finally {
+      socialSendButton.disabled = false;
+    }
+  }
+
   function setRoomBrowserOpen(active) {
     roomBrowserOpen = Boolean(active);
     roomBrowser.classList.toggle("is-hidden", !roomBrowserOpen);
@@ -2101,11 +2707,17 @@ function bootstrap() {
 
   function updateRoomModeFieldState() {
     const hordeMode = roomModeSelect.value === MULTIPLAYER_VARIANTS.horde;
+    const arcadeMode = roomModeSelect.value === MULTIPLAYER_VARIANTS.arcade;
+    roomMiniGameField.hidden = !arcadeMode;
+    roomMinPlayersField.hidden = !hordeMode;
     roomMinPlayersInput.disabled = !hordeMode;
     if (!hordeMode) {
       roomMinPlayersInput.value = "1";
     } else if (Number(roomMinPlayersInput.value || 0) < 2) {
       roomMinPlayersInput.value = "2";
+    }
+    if (arcadeMode) {
+      roomBrowserPreferredMiniGame = String(roomMiniGameSelect.value || roomBrowserPreferredMiniGame || DEFAULT_MINI_GAME_ID);
     }
   }
 
@@ -2133,7 +2745,9 @@ function bootstrap() {
       tag.textContent =
         room.variant === MULTIPLAYER_VARIANTS.horde
           ? t("roomBrowser.modeHorde")
-          : t("roomBrowser.modePvp");
+          : room.variant === MULTIPLAYER_VARIANTS.arcade
+            ? t("roomBrowser.modeArcade") + " • " + getLocalizedMiniGameLabel(String(room.miniGame || DEFAULT_MINI_GAME_ID))
+            : t("roomBrowser.modePvp");
 
       head.append(name, tag);
 
@@ -2152,10 +2766,13 @@ function bootstrap() {
           needed: Number(room.minPlayers || 1),
         });
       } else {
+        const suffix = room.variant === MULTIPLAYER_VARIANTS.arcade && room.miniGame
+          ? getLocalizedMiniGameLabel(String(room.miniGame))
+          : t("roomBrowser.started");
         right.textContent =
           t("roomBrowser.players", { players: Number(room.playerCount || 0) }) +
           " • " +
-          t("roomBrowser.started");
+          suffix;
       }
 
       meta.append(left, right);
@@ -2174,6 +2791,7 @@ function bootstrap() {
   }
 
   async function refreshRoomBrowserRooms() {
+
     roomRefreshButton.disabled = true;
     try {
       const response = await fetch("/api/multiplayer/rooms", { method: "GET" });
@@ -2193,10 +2811,16 @@ function bootstrap() {
     }
   }
 
-  function openRoomBrowser(variant) {
+  function openRoomBrowser(variant, miniGameId) {
     roomBrowserPreferredVariant =
-      variant === MULTIPLAYER_VARIANTS.horde ? MULTIPLAYER_VARIANTS.horde : MULTIPLAYER_VARIANTS.pvp;
+      variant === MULTIPLAYER_VARIANTS.horde
+        ? MULTIPLAYER_VARIANTS.horde
+        : variant === MULTIPLAYER_VARIANTS.arcade
+          ? MULTIPLAYER_VARIANTS.arcade
+          : MULTIPLAYER_VARIANTS.pvp;
+    roomBrowserPreferredMiniGame = miniGameId && MINI_GAMES[miniGameId] ? miniGameId : roomBrowserPreferredMiniGame || DEFAULT_MINI_GAME_ID;
     roomModeSelect.value = roomBrowserPreferredVariant;
+    roomMiniGameSelect.value = roomBrowserPreferredMiniGame;
     updateRoomModeFieldState();
     roomCreatedCodeReadout.hidden = true;
     roomCreatedCodeReadout.textContent = "";
@@ -2245,6 +2869,7 @@ function bootstrap() {
     multiplayerDeaths = Number.isFinite(Number(playerInfo.deaths)) ? Number(playerInfo.deaths) : 0;
     applyMultiplayerRoomInfo(roomInfo || {}, { announceTransition: false });
     applyMultiplayerSelfState(playerInfo, { forceTransform: true });
+    closeMiniGameBrowser();
     closeRoomBrowser();
 
     if (multiplayerRoomPrivate && multiplayerRoomCode) {
@@ -2281,6 +2906,7 @@ function bootstrap() {
           variant: roomModeSelect.value,
           private: roomPrivacySelect.value === "private",
           minPlayers: Number(roomMinPlayersInput.value || 1),
+          miniGame: roomMiniGameSelect.value,
         }),
       });
       if (!response.ok) {
@@ -2370,6 +2996,10 @@ function bootstrap() {
     roomBrowserTitle.textContent = t("roomBrowser.title");
     roomBrowserSummary.textContent = t("roomBrowser.summary");
     roomBrowserCloseButton.textContent = t("roomBrowser.close");
+    miniGameBrowserEyebrow.textContent = t("miniGameBrowser.eyebrow");
+    miniGameBrowserTitle.textContent = t("miniGameBrowser.title");
+    miniGameBrowserSummary.textContent = t("miniGameBrowser.summary");
+    miniGameBrowserCloseButton.textContent = t("miniGameBrowser.close");
     roomPlayerNameLabel.textContent = t("roomBrowser.playerName");
     roomPlayerNameInput.placeholder = t("common.player");
     roomCreateLabel.textContent = t("roomBrowser.create");
@@ -2377,10 +3007,16 @@ function bootstrap() {
     roomModeLabel.textContent = t("roomBrowser.mode");
     roomModeSelect.options[0].textContent = t("roomBrowser.modePvp");
     roomModeSelect.options[1].textContent = t("roomBrowser.modeHorde");
+    roomModeSelect.options[2].textContent = t("roomBrowser.modeArcade");
+    roomMiniGameLabel.textContent = t("roomBrowser.miniGame");
     roomPrivacyLabel.textContent = t("roomBrowser.privacy");
     roomPrivacySelect.options[0].textContent = t("roomBrowser.privacyPublic");
     roomPrivacySelect.options[1].textContent = t("roomBrowser.privacyPrivate");
     roomMinPlayersLabel.textContent = t("roomBrowser.minPlayers");
+    roomMiniGameSelect.options[0].textContent = getLocalizedMiniGameLabel("sharpshooter");
+    roomMiniGameSelect.options[1].textContent = getLocalizedMiniGameLabel("zombie-blitz");
+    roomMiniGameSelect.options[2].textContent = getLocalizedMiniGameLabel("checkpoint-sprint");
+    roomMiniGameSelect.options[3].textContent = getLocalizedMiniGameLabel("distance-dash");
     roomCreateButton.textContent = t("roomBrowser.createAction");
     roomPrivateJoinLabel.textContent = t("roomBrowser.privateJoin");
     roomCodeInput.placeholder = t("roomBrowser.codePlaceholder");
@@ -2401,11 +3037,21 @@ function bootstrap() {
     multiplayerHordeTag.textContent = t("modes.horde.tag");
     multiplayerHordeTitle.textContent = t("modes.horde.title");
     multiplayerHordeDescription.textContent = t("modes.horde.description");
+    miniGamesTag.textContent = t("modes.arcade.tag");
+    miniGamesTitle.textContent = t("modes.arcade.title");
+    miniGamesDescription.textContent = t("modes.arcade.description");
 
     shopEyebrow.textContent = t("shop.eyebrow");
     shopTitle.textContent = t("shop.title");
     shopSummary.textContent = t("shop.summary");
     shopCredits.textContent = t("shop.credits", { credits: 0 });
+    socialEyebrow.textContent = t("social.eyebrow");
+    socialTitle.textContent = t("social.title");
+    socialCloseButton.textContent = t("social.close");
+    socialRosterLabel.textContent = t("social.roster");
+    socialChatLabel.textContent = t("social.chat");
+    socialChatInput.placeholder = t("social.input");
+    socialSendButton.textContent = t("social.send");
 
     touchFireButton.textContent = t("touch.fire");
     touchAimButton.textContent = t("touch.aim");
@@ -2417,6 +3063,9 @@ function bootstrap() {
     touchViewButton.textContent = t("touch.view");
     touchPickupButton.textContent = t("touch.pickup");
     touchWallButton.textContent = t("touch.wall");
+    touchShopButton.textContent = t("touch.shop");
+    touchChatButton.textContent = t("touch.chat");
+    socialHudButton.textContent = t("social.eyebrow");
     sprintMeterLabel.textContent = t("status.sprint");
     startButton.textContent = playerIsDead ? t("buttons.respawn") : t("buttons.resume");
 
@@ -2424,7 +3073,9 @@ function bootstrap() {
     configureModeUi();
     updateScopeLabel();
     updateLoadoutBar();
+    renderMiniGameBrowser();
     renderRoomBrowserRooms();
+    renderSocialPanel();
   }
 
   function setLanguage(language) {
@@ -2436,9 +3087,6 @@ function bootstrap() {
   function setControlScheme(scheme) {
     selectedControlScheme =
       scheme === CONTROL_SCHEMES.pad ? CONTROL_SCHEMES.pad : CONTROL_SCHEMES.desktop;
-    if (selectedControlScheme !== CONTROL_SCHEMES.pad && controlFitEditorOpen) {
-      closeControlFitEditor({ resume: false });
-    }
     updateMenuSelectionUi();
     updateInstructionCopy();
     applyScreenFitLayout();
@@ -2633,6 +3281,12 @@ function bootstrap() {
     });
     bindTouchTap(touchWallButton, function () {
       attemptBuildDefenseWall();
+    });
+    bindTouchTap(touchShopButton, function () {
+      setBootMessage(t("shop.summary"));
+    });
+    bindTouchTap(touchChatButton, function () {
+      toggleSocialPanel();
     });
   }
 
@@ -3153,6 +3807,13 @@ function bootstrap() {
   multiplayerHordeButton.addEventListener("click", function () {
     startMultiplayerVariant(MULTIPLAYER_VARIANTS.horde);
   });
+  miniGamesButton.addEventListener("click", openMiniGameBrowser);
+  miniGameBrowserCloseButton.addEventListener("click", closeMiniGameBrowser);
+  miniGameBrowser.addEventListener("click", function (event) {
+    if (event.target === miniGameBrowser) {
+      closeMiniGameBrowser();
+    }
+  });
   roomBrowserCloseButton.addEventListener("click", closeRoomBrowser);
   roomBrowser.addEventListener("click", function (event) {
     if (event.target === roomBrowser) {
@@ -3163,6 +3824,10 @@ function bootstrap() {
   roomCreateButton.addEventListener("click", createRoomFromBrowser);
   roomJoinCodeButton.addEventListener("click", joinRoomByCode);
   roomModeSelect.addEventListener("change", updateRoomModeFieldState);
+  roomMiniGameSelect.addEventListener("change", function () {
+    roomBrowserPreferredMiniGame = String(roomMiniGameSelect.value || DEFAULT_MINI_GAME_ID);
+    updateRoomModeFieldState();
+  });
   roomCodeInput.addEventListener("input", function () {
     roomCodeInput.value = String(roomCodeInput.value || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
   });
@@ -3186,21 +3851,30 @@ function bootstrap() {
   });
   screenFitOpenButton.addEventListener("click", openScreenFitEditor);
   screenFitPauseButton.addEventListener("click", openScreenFitEditor);
-  screenFitHudButton.addEventListener("click", function (event) {
-    if (controlFitEditorOpen) {
-      event.preventDefault();
-      return;
-    }
-    openScreenFitEditor();
-  });
   controlFitOpenButton.addEventListener("click", openControlFitEditor);
   controlFitPauseButton.addEventListener("click", openControlFitEditor);
-  controlFitHudButton.addEventListener("click", function (event) {
-    if (controlFitEditorOpen) {
+  socialHudButton.addEventListener("click", function (event) {
+    if (screenFitEditorOpen || controlFitEditorOpen) {
       event.preventDefault();
       return;
     }
-    openControlFitEditor();
+    toggleSocialPanel();
+  });
+  socialCloseButton.addEventListener("click", function () {
+    closeSocialPanel();
+  });
+  socialSendButton.addEventListener("click", function () {
+    sendSocialChatMessage();
+  });
+  socialChatInput.addEventListener("keydown", function (event) {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      sendSocialChatMessage();
+    }
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeSocialPanel();
+    }
   });
   screenFitResetButton.addEventListener("click", function () {
     updateCurrentScreenFitProfile(getDefaultScreenFitProfile(getScreenFitProfileKey()));
@@ -3216,7 +3890,7 @@ function bootstrap() {
     adjustSelectedControlFitSize(0.08);
   });
   controlFitResetButton.addEventListener("click", function () {
-    updateCurrentControlLayoutProfile(CONTROL_LAYOUT_DEFAULTS.pad);
+    updateCurrentControlLayoutProfile(CONTROL_LAYOUT_DEFAULTS[getControlLayoutProfileKey()]);
     updateControlFitCopy();
   });
   controlFitDoneButton.addEventListener("click", function () {
@@ -3246,12 +3920,6 @@ function bootstrap() {
     leaveMultiplayerSession(true);
   });
   startButton.addEventListener("click", requestWorldPointerLock);
-
-  renderer.domElement.addEventListener("click", function () {
-    if (selectedControlScheme === CONTROL_SCHEMES.desktop && singlePlayerStarted && !pointerLocked) {
-      requestWorldPointerLock();
-    }
-  });
 
   document.addEventListener("pointerlockchange", function () {
     if (selectedControlScheme !== CONTROL_SCHEMES.desktop) {
@@ -3287,7 +3955,6 @@ function bootstrap() {
     sound.resume();
 
     if (!pointerLocked) {
-      requestWorldPointerLock();
       return;
     }
 
@@ -3328,7 +3995,35 @@ function bootstrap() {
     }
   });
 
+  window.addEventListener(
+    "wheel",
+    function (event) {
+      if (!controlFitEditorOpen) {
+        return;
+      }
+      event.preventDefault();
+      adjustSelectedControlFitSize(event.deltaY > 0 ? -0.06 : 0.06);
+    },
+    { passive: false }
+  );
+
   window.addEventListener("keydown", function (event) {
+    if (roomBrowserOpen) {
+      if (event.code === "Escape") {
+        closeRoomBrowser();
+        event.preventDefault();
+      }
+      return;
+    }
+
+    if (miniGameBrowserOpen) {
+      if (event.code === "Escape") {
+        closeMiniGameBrowser();
+        event.preventDefault();
+      }
+      return;
+    }
+
     if (screenFitEditorOpen) {
       if (event.code === "Escape" || event.code === "KeyU") {
         closeScreenFitEditor();
@@ -3338,8 +4033,49 @@ function bootstrap() {
     }
 
     if (controlFitEditorOpen) {
-      if (event.code === "Escape" || event.code === "KeyI") {
+      if (event.code === "Escape" || event.code === "KeyI" || event.code === "Enter") {
         closeControlFitEditor();
+        event.preventDefault();
+        return;
+      }
+      if (event.code === "BracketLeft" || event.code === "Minus") {
+        adjustSelectedControlFitSize(-0.08);
+        event.preventDefault();
+        return;
+      }
+      if (
+        event.code === "BracketRight" ||
+        event.code === "Equal" ||
+        event.code === "NumpadAdd"
+      ) {
+        adjustSelectedControlFitSize(0.08);
+        event.preventDefault();
+        return;
+      }
+      if (event.code === "KeyR") {
+        updateCurrentControlLayoutProfile(
+          CONTROL_LAYOUT_DEFAULTS[getControlLayoutProfileKey()]
+        );
+        updateControlFitCopy();
+        event.preventDefault();
+        return;
+      }
+      if (event.code === "ArrowRight" || event.code === "ArrowDown") {
+        cycleDesktopControlFitTarget(1);
+        event.preventDefault();
+        return;
+      }
+      if (event.code === "ArrowLeft" || event.code === "ArrowUp") {
+        cycleDesktopControlFitTarget(-1);
+        event.preventDefault();
+        return;
+      }
+      return;
+    }
+
+    if (socialPanelOpen) {
+      if (event.code === "Escape" || event.code === "KeyT" || event.code === "KeyP") {
+        closeSocialPanel();
         event.preventDefault();
       }
       return;
@@ -3389,12 +4125,17 @@ function bootstrap() {
         dropSelectedWeapon();
         event.preventDefault();
         break;
-      case "KeyP":
+      case "KeyF":
         pickUpNearbyWeapon();
         event.preventDefault();
         break;
       case "KeyH":
         useHealingPotion();
+        event.preventDefault();
+        break;
+      case "KeyP":
+      case "KeyT":
+        toggleSocialPanel();
         event.preventDefault();
         break;
       case "KeyG":
@@ -3847,6 +4588,174 @@ function bootstrap() {
     return true;
   }
 
+  function createMiniGameCheckpointMarker(index) {
+    const group = new THREE.Group();
+    const ring = new THREE.Mesh(
+      miniGameCheckpointGeometry,
+      miniGameCheckpointIdleMaterial.clone()
+    );
+    ring.rotation.x = Math.PI * 0.5;
+    const beam = new THREE.Mesh(
+      miniGameCheckpointBeamGeometry,
+      miniGameCheckpointIdleMaterial.clone()
+    );
+    beam.position.y = 3.6;
+    group.add(ring);
+    group.add(beam);
+    group.userData.index = index;
+    miniGameRoot.add(group);
+    return { group: group, ring: ring, beam: beam };
+  }
+
+  function ensureMiniGameCheckpoints() {
+    if (miniGameCheckpoints.length) {
+      return;
+    }
+    MINI_GAME_CHECKPOINTS.forEach(function (_point, index) {
+      miniGameCheckpoints.push(createMiniGameCheckpointMarker(index));
+    });
+  }
+
+  function setMiniGameCheckpointVisibility(visible) {
+    miniGameRoot.visible = Boolean(visible);
+    if (!visible) {
+      miniGameCheckpoints.forEach(function (marker) {
+        marker.group.visible = false;
+      });
+      return;
+    }
+    miniGameCheckpoints.forEach(function (marker, index) {
+      const point = MINI_GAME_CHECKPOINTS[index];
+      marker.group.visible = true;
+      marker.group.position.set(point.x, sampleHeight(point.x, point.z) + 0.18, point.z);
+    });
+  }
+
+  function resetMiniGameRunState() {
+    miniGameScore = 0;
+    miniGameProgressText = "";
+    miniGameEndsAt = 0;
+    miniGameDistanceMeters = 0;
+    miniGameBaselineHits = totalHits;
+    miniGameBaselineZombieKills = zombieKills;
+    miniGameCheckpointIndex = 0;
+    miniGameCompleteAnnounced = false;
+    miniGameDistanceSample.copy(player.position);
+    setMiniGameCheckpointVisibility(false);
+  }
+
+  function beginMiniGameRound() {
+    resetMiniGameRunState();
+    const miniGameId = getActiveMiniGameId();
+    if (!miniGameId) {
+      return;
+    }
+    const config = getMiniGameConfig(miniGameId);
+    miniGameBaselineHits = totalHits;
+    miniGameBaselineZombieKills = zombieKills;
+    miniGameDistanceSample.copy(player.position);
+    miniGameEndsAt =
+      isMultiplayerMiniGameRoom() && multiplayerRoomMiniGameEndsAt > 0
+        ? multiplayerRoomMiniGameEndsAt
+        : Date.now() / 1000 + config.duration;
+    if (miniGameId === "checkpoint-sprint") {
+      ensureMiniGameCheckpoints();
+      setMiniGameCheckpointVisibility(true);
+      miniGameProgressText = "0 / " + String(config.goal || 0);
+    }
+  }
+
+  function getMiniGameTimeRemaining() {
+    const roomEndAt = isMultiplayerMiniGameRoom() ? multiplayerRoomMiniGameEndsAt : 0;
+    const effectiveEndAt = roomEndAt > 0 ? roomEndAt : miniGameEndsAt;
+    return Math.max(0, effectiveEndAt - Date.now() / 1000);
+  }
+
+  function updateMiniGameState(delta) {
+    const miniGameId = getActiveMiniGameId();
+    if (!miniGameId) {
+      setMiniGameCheckpointVisibility(false);
+      return;
+    }
+
+    const config = getMiniGameConfig(miniGameId);
+    const remaining = getMiniGameTimeRemaining();
+    const active = remaining > 0;
+
+    if (miniGameId === "sharpshooter") {
+      miniGameScore = Math.max(0, totalHits - miniGameBaselineHits);
+      miniGameProgressText =
+        selectedLanguage === LANGUAGES.zh
+          ? "命中 " + Math.round(miniGameScore)
+          : Math.round(miniGameScore) + " hits";
+      setMiniGameCheckpointVisibility(false);
+    } else if (miniGameId === "zombie-blitz") {
+      miniGameScore = Math.max(0, zombieKills - miniGameBaselineZombieKills);
+      miniGameProgressText =
+        selectedLanguage === LANGUAGES.zh
+          ? "击杀 " + Math.round(miniGameScore)
+          : Math.round(miniGameScore) + " kills";
+      setMiniGameCheckpointVisibility(false);
+    } else if (miniGameId === "distance-dash") {
+      if (active && !playerIsDead) {
+        const distanceStep = Math.hypot(
+          player.position.x - miniGameDistanceSample.x,
+          player.position.z - miniGameDistanceSample.z
+        );
+        miniGameDistanceMeters += distanceStep;
+      }
+      miniGameDistanceSample.copy(player.position);
+      miniGameScore = Math.round(miniGameDistanceMeters);
+      miniGameProgressText =
+        selectedLanguage === LANGUAGES.zh
+          ? miniGameScore + " 米"
+          : miniGameScore + " m";
+      setMiniGameCheckpointVisibility(false);
+    } else if (miniGameId === "checkpoint-sprint") {
+      ensureMiniGameCheckpoints();
+      setMiniGameCheckpointVisibility(true);
+      const targetIndex = miniGameCheckpointIndex % MINI_GAME_CHECKPOINTS.length;
+      const checkpoint = MINI_GAME_CHECKPOINTS[targetIndex];
+      const radius = 6.4;
+      if (active && !playerIsDead && checkpoint) {
+        const dx = player.position.x - checkpoint.x;
+        const dz = player.position.z - checkpoint.z;
+        if (dx * dx + dz * dz <= radius * radius) {
+          miniGameCheckpointIndex += 1;
+          miniGameScore += 1;
+          sound.pickupWeapon();
+        }
+      }
+      const activeIndex = miniGameCheckpointIndex % MINI_GAME_CHECKPOINTS.length;
+      miniGameCheckpoints.forEach(function (marker, index) {
+        const isActive = index === activeIndex;
+        marker.group.rotation.y += delta * (isActive ? 1.8 : 0.9);
+        marker.ring.material.color.set(isActive ? 0x8df4c8 : 0xffd37a);
+        marker.beam.material.color.set(isActive ? 0x52c7ff : 0xffd37a);
+        marker.ring.material.opacity = isActive ? 0.98 : 0.52;
+        marker.beam.material.opacity = isActive ? 0.72 : 0.34;
+        const pulse = 1 + Math.sin(performance.now() * 0.004 + index) * (isActive ? 0.1 : 0.04);
+        marker.group.scale.setScalar(pulse);
+      });
+      miniGameProgressText = Math.round(miniGameScore) + " / " + String(config.goal || 0);
+    }
+
+    if (!active && !miniGameCompleteAnnounced) {
+      miniGameCompleteAnnounced = true;
+      const finishedText =
+        selectedLanguage === LANGUAGES.zh
+          ? getLocalizedMiniGameLabel(miniGameId) + " 结束，得分 " + Math.round(miniGameScore)
+          : getLocalizedMiniGameLabel(miniGameId) + " finished with " + Math.round(miniGameScore);
+      setBootMessage(finishedText);
+    }
+  }
+
+  function startSoloMiniGame(miniGameId) {
+    activeMiniGameId = MINI_GAMES[miniGameId] ? miniGameId : DEFAULT_MINI_GAME_ID;
+    closeMiniGameBrowser();
+    startMode(MODES.minigames);
+  }
+
   function startMode(mode) {
     const multiplayerMode = mode === MODES.multiplayer;
     if (multiplayerMode && !multiplayerPlayerId) {
@@ -3859,6 +4768,12 @@ function bootstrap() {
       clearRemotePlayers();
     }
 
+    if (mode !== MODES.minigames) {
+      activeMiniGameId = mode === MODES.multiplayer && multiplayerVariant === MULTIPLAYER_VARIANTS.arcade
+        ? multiplayerRoomMiniGame || DEFAULT_MINI_GAME_ID
+        : activeMiniGameId;
+    }
+
     currentMode = mode;
     sound.resume();
 
@@ -3868,11 +4783,14 @@ function bootstrap() {
       menuScreen.classList.add("is-hidden");
     }
 
-    configureModeUi();
-    resetRunState(
+    const resetZombies =
       mode === MODES.zombie ||
-        (mode === MODES.multiplayer && multiplayerVariant === MULTIPLAYER_VARIANTS.horde)
-    );
+      (mode === MODES.multiplayer && multiplayerVariant === MULTIPLAYER_VARIANTS.horde) ||
+      ((mode === MODES.minigames || (mode === MODES.multiplayer && multiplayerVariant === MULTIPLAYER_VARIANTS.arcade)) && activeMiniGameUsesZombies());
+
+    configureModeUi();
+    resetRunState(resetZombies);
+    beginMiniGameRound();
     if (multiplayerMode) {
       multiplayerSyncTimer = 0;
       multiplayerPollTimer = 0;
@@ -3883,22 +4801,28 @@ function bootstrap() {
   function configureModeUi() {
     const multiplayerMode = currentMode === MODES.multiplayer;
     const hordeMode = multiplayerMode && multiplayerVariant === MULTIPLAYER_VARIANTS.horde;
-    const zombieMode = currentMode === MODES.zombie || hordeMode;
-    const pvpMode = multiplayerMode && !hordeMode;
+    const arcadeMode = multiplayerMode && multiplayerVariant === MULTIPLAYER_VARIANTS.arcade;
+    const miniGameMode = currentMode === MODES.minigames;
+    const zombieMode = currentMode === MODES.zombie || hordeMode || (miniGameMode && activeMiniGameUsesZombies()) || (arcadeMode && activeMiniGameUsesZombies());
+    const pvpMode = multiplayerMode && !hordeMode && !arcadeMode;
     brandEyebrow.textContent = pvpMode
       ? t("brand.pvp.eyebrow")
       : hordeMode
         ? t("brand.horde.eyebrow")
-        : zombieMode
-          ? t("brand.zombie.eyebrow")
-          : t("brand.single.eyebrow");
+        : arcadeMode || miniGameMode
+          ? t("modes.arcade.title")
+          : zombieMode
+            ? t("brand.zombie.eyebrow")
+            : t("brand.single.eyebrow");
     brandSummary.textContent = pvpMode
       ? t("brand.pvp.summary")
       : hordeMode
         ? t("brand.horde.summary")
-        : zombieMode
-          ? t("brand.zombie.summary")
-          : t("brand.single.summary");
+        : arcadeMode || miniGameMode
+          ? getLocalizedMiniGameDescription(getActiveMiniGameId() || DEFAULT_MINI_GAME_ID)
+          : zombieMode
+            ? t("brand.zombie.summary")
+            : t("brand.single.summary");
     document.body.classList.toggle("is-zombie-mode", zombieMode);
   }
 
@@ -3950,6 +4874,7 @@ function bootstrap() {
     clearBombs();
     clearExplosions();
     syncEquippedWeaponModel();
+    resetMiniGameRunState();
 
     if (resetZombies) {
       clearZombies();
@@ -4188,42 +5113,17 @@ function bootstrap() {
   }
 
   function createRemotePlayerAvatar(playerInfo) {
-    const group = new THREE.Group();
+    const avatar = createPlayerAvatar();
+    const group = avatar.group;
+    group.visible = true;
+
     const color = chooseMultiplayerColor(playerInfo.id || playerInfo.name || "player");
-    const bodyMaterial = new THREE.MeshStandardMaterial({
-      color,
-      roughness: 0.42,
-      metalness: 0.08,
-    });
-    const body = new THREE.Mesh(
-      new THREE.CapsuleGeometry(0.72, 2.8, 6, 10),
-      bodyMaterial
-    );
-    body.position.y = PLAYER.height * 0.5 - 0.5;
-    group.add(body);
-
-    const visor = new THREE.Mesh(
-      new THREE.BoxGeometry(0.95, 0.42, 0.24),
-      new THREE.MeshStandardMaterial({
-        color: 0xd8ecff,
-        roughness: 0.25,
-        metalness: 0.3,
-      })
-    );
-    visor.position.set(0, PLAYER.height - 0.95, -0.76);
-    group.add(visor);
-
-    const facing = new THREE.Mesh(
-      new THREE.ConeGeometry(0.34, 0.95, 8),
-      new THREE.MeshStandardMaterial({
-        color: 0xffffff,
-        roughness: 0.5,
-        metalness: 0.02,
-      })
-    );
-    facing.rotation.x = Math.PI / 2;
-    facing.position.set(0, PLAYER.height - 1.4, -1.3);
-    group.add(facing);
+    if (avatar.visor && avatar.visor.material) {
+      avatar.visor.material = avatar.visor.material.clone();
+      avatar.visor.material.color.copy(color.clone().lerp(new THREE.Color(0xffffff), 0.28));
+      avatar.visor.material.emissive.copy(color.clone().multiplyScalar(0.22));
+      avatar.visor.material.emissiveIntensity = 0.44;
+    }
 
     const nameTag = createNameTag(playerInfo.name || "Player");
     nameTag.position.set(0, PLAYER.height + 0.75, 0);
@@ -4242,7 +5142,13 @@ function bootstrap() {
     group.add(hitbox);
     remotePlayerHitMeshes.push(hitbox);
 
-    remotePlayerRoot.add(group);
+    const weaponModels = LOADOUT.map(function (weaponConfig) {
+      const model = createWeaponModel(weaponConfig.type, true);
+      model.group.visible = false;
+      avatar.weaponMount.add(model.group);
+      return { type: weaponConfig.type, model: model };
+    });
+
     const health = Number.isFinite(playerInfo.health)
       ? playerInfo.health
       : MULTIPLAYER.maxHealth;
@@ -4250,25 +5156,81 @@ function bootstrap() {
       ? playerInfo.maxHealth
       : MULTIPLAYER.maxHealth;
     const isDead = Boolean(playerInfo.isDead);
+    const weaponConfig = getWeaponConfigByType(playerInfo.weaponType || "minigun");
+
+    const visualMeshes = [];
+    group.traverse(function (child) {
+      if (child.isMesh && child !== hitbox) {
+        visualMeshes.push(child);
+      }
+    });
+
+    remotePlayerRoot.add(group);
     updateNameTag(nameTag, playerInfo.name || "Player", health, maxHealth, isDead);
 
-    return {
+    const remote = {
       id: playerInfo.id,
       name: playerInfo.name,
-      group,
-      body,
-      bodyMaterial,
-      visor,
-      facing,
-      nameTag,
-      hitbox,
-      health,
-      maxHealth,
-      isDead,
+      group: group,
+      torso: avatar.torso,
+      head: avatar.head,
+      rightArm: avatar.rightArm,
+      leftArm: avatar.leftArm,
+      rightLeg: avatar.rightLeg,
+      leftLeg: avatar.leftLeg,
+      weaponMount: avatar.weaponMount,
+      visor: avatar.visor,
+      weaponModels: weaponModels,
+      activeWeaponModel: weaponModels[0].model,
+      visualMeshes: visualMeshes,
+      nameTag: nameTag,
+      hitbox: hitbox,
+      health: health,
+      maxHealth: maxHealth,
+      isDead: isDead,
       targetPosition: new THREE.Vector3(playerInfo.x, playerInfo.y, playerInfo.z),
-      targetYaw: playerInfo.yaw,
+      targetYaw: Number.isFinite(Number(playerInfo.yaw)) ? Number(playerInfo.yaw) : 0,
+      targetPitch: Number.isFinite(Number(playerInfo.pitch)) ? Number(playerInfo.pitch) : 0,
       lastSeenAt: performance.now(),
+      weaponType: weaponConfig.type,
+      aiming: Boolean(playerInfo.aiming),
+      firing: Boolean(playerInfo.firing),
+      sprinting: Boolean(playerInfo.sprinting),
+      sliding: Boolean(playerInfo.sliding),
+      reloading: Boolean(playerInfo.reloading),
+      reloadPhase: Number.isFinite(Number(playerInfo.reloadPhase)) ? Number(playerInfo.reloadPhase) : 0,
+      action: Number.isFinite(Number(playerInfo.action)) ? Number(playerInfo.action) : 0,
+      aimWeight: 0,
+      moveSpeed: 0,
+      stepTime: Math.random() * Math.PI * 2,
+      flashLife: 0,
+      barrelSpin: 0,
+      slideWeight: 0,
     };
+
+    setRemoteWeaponType(remote, remote.weaponType);
+    remote.group.position.set(
+      remote.targetPosition.x,
+      remote.targetPosition.y - PLAYER.height + 0.18,
+      remote.targetPosition.z
+    );
+    remote.group.rotation.y = remote.targetYaw;
+    setRemotePlayerVisualState(remote);
+    return remote;
+  }
+
+  function setRemoteWeaponType(remote, weaponType) {
+    const weaponConfig = getWeaponConfigByType(weaponType);
+    remote.weaponType = weaponConfig.type;
+    remote.currentWeaponConfig = weaponConfig;
+    remote.activeWeaponModel = remote.weaponModels[0].model;
+    remote.weaponModels.forEach(function (entry) {
+      const visible = entry.type === weaponConfig.type;
+      entry.model.group.visible = visible;
+      if (visible) {
+        remote.activeWeaponModel = entry.model;
+      }
+    });
   }
 
   function clearRemotePlayers() {
@@ -4292,12 +5254,16 @@ function bootstrap() {
 
   function setRemotePlayerVisualState(remote) {
     const alpha = remote.isDead ? 0.32 : 1;
-    remote.bodyMaterial.transparent = alpha < 1;
-    remote.bodyMaterial.opacity = alpha;
-    remote.visor.material.transparent = alpha < 1;
-    remote.visor.material.opacity = alpha;
-    remote.facing.material.transparent = alpha < 1;
-    remote.facing.material.opacity = alpha;
+    remote.visualMeshes.forEach(function (mesh) {
+      const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+      materials.forEach(function (material) {
+        if (!material || typeof material.opacity !== "number") {
+          return;
+        }
+        material.transparent = alpha < 1 || material.transparent;
+        material.opacity = alpha;
+      });
+    });
     updateNameTag(
       remote.nameTag,
       remote.name,
@@ -4318,10 +5284,12 @@ function bootstrap() {
     const y = Number(playerInfo.y);
     const z = Number(playerInfo.z);
     const yaw = Number(playerInfo.yaw);
+    const pitch = Number(playerInfo.pitch);
     const clampedX = Number.isFinite(x) ? x : 0;
     const clampedY = Number.isFinite(y) ? y : sampleHeight(clampedX, Number.isFinite(z) ? z : 0) + PLAYER.height;
     const clampedZ = Number.isFinite(z) ? z : 0;
     const clampedYaw = Number.isFinite(yaw) ? yaw : 0;
+    const clampedPitch = Number.isFinite(pitch) ? THREE.MathUtils.clamp(pitch, -Math.PI / 2 + 0.08, Math.PI / 2 - 0.08) : 0;
     const playerName = String(playerInfo.name || "Player");
     const health = Number.isFinite(Number(playerInfo.health))
       ? Number(playerInfo.health)
@@ -4330,6 +5298,14 @@ function bootstrap() {
       ? Number(playerInfo.maxHealth)
       : MULTIPLAYER.maxHealth;
     const isDead = Boolean(playerInfo.isDead);
+    const weaponConfig = getWeaponConfigByType(playerInfo.weaponType || "minigun");
+    const aiming = Boolean(playerInfo.aiming);
+    const firing = Boolean(playerInfo.firing);
+    const sprinting = Boolean(playerInfo.sprinting);
+    const sliding = Boolean(playerInfo.sliding);
+    const reloading = Boolean(playerInfo.reloading);
+    const reloadPhase = Number.isFinite(Number(playerInfo.reloadPhase)) ? Number(playerInfo.reloadPhase) : 0;
+    const action = Number.isFinite(Number(playerInfo.action)) ? Number(playerInfo.action) : 0;
 
     let remote = remotePlayers.get(playerId);
     if (!remote) {
@@ -4340,13 +5316,19 @@ function bootstrap() {
         y: clampedY,
         z: clampedZ,
         yaw: clampedYaw,
-        health,
-        maxHealth,
-        isDead,
+        pitch: clampedPitch,
+        weaponType: weaponConfig.type,
+        aiming: aiming,
+        firing: firing,
+        sprinting: sprinting,
+        sliding: sliding,
+        reloading: reloading,
+        reloadPhase: reloadPhase,
+        action: action,
+        health: health,
+        maxHealth: maxHealth,
+        isDead: isDead,
       });
-      remote.group.position.copy(remote.targetPosition);
-      remote.group.rotation.y = remote.targetYaw;
-      setRemotePlayerVisualState(remote);
       remotePlayers.set(playerId, remote);
       return;
     }
@@ -4358,8 +5340,162 @@ function bootstrap() {
     remote.hitbox.userData.remotePlayerId = playerId;
     remote.targetPosition.set(clampedX, clampedY, clampedZ);
     remote.targetYaw = clampedYaw;
+    remote.targetPitch = clampedPitch;
     remote.lastSeenAt = now;
+    remote.aiming = aiming;
+    remote.firing = firing;
+    remote.sprinting = sprinting;
+    remote.sliding = sliding;
+    remote.reloading = reloading;
+    remote.reloadPhase = THREE.MathUtils.clamp(reloadPhase, 0, 1);
+    remote.action = THREE.MathUtils.clamp(action, 0, 1);
+    if (remote.weaponType !== weaponConfig.type) {
+      setRemoteWeaponType(remote, weaponConfig.type);
+    }
+    if (remote.firing) {
+      remote.flashLife = Math.max(remote.flashLife, currentMode === MODES.multiplayer ? 0.08 : 0.05);
+    }
     setRemotePlayerVisualState(remote);
+  }
+
+  function updateRemotePlayerPose(remote, delta) {
+    const currentWeapon = remote.currentWeaponConfig || getWeaponConfigByType(remote.weaponType);
+    const pose = AVATAR_POSES[currentWeapon.type];
+    const aimingWeightTarget = remote.aiming && currentWeapon.supportsAim ? 1 : 0;
+    remote.aimWeight = THREE.MathUtils.damp(remote.aimWeight || 0, aimingWeightTarget, 10, delta);
+    remote.slideWeight = THREE.MathUtils.damp(remote.slideWeight || 0, remote.sliding ? 1 : 0, remote.sliding ? 18 : 11, delta);
+
+    const sprinting = remote.sliding || remote.sprinting;
+    const movementWeight = Math.min((remote.moveSpeed || 0) / PLAYER.sprintSpeed, 1);
+    const strideStrength = remote.isDead ? 0 : movementWeight * (1 - remote.aimWeight * 0.45);
+    remote.stepTime += delta * ((sprinting ? 11 : 7.2) * Math.max(0.2, movementWeight));
+    const stride = remote.stepTime * (sprinting ? 1.05 : 0.82);
+    const reloadArc = Math.sin(THREE.MathUtils.clamp(remote.reloadPhase || 0, 0, 1) * Math.PI);
+    const actionProgress = 1 - THREE.MathUtils.clamp(remote.action || 0, 0, 1);
+    const actionArc = remote.action > 0
+      ? Math.sin(THREE.MathUtils.clamp(actionProgress, 0, 1) * Math.PI)
+      : 0;
+    const bodyBob = Math.abs(Math.cos(remote.stepTime * 2)) * 0.14 * strideStrength;
+
+    const slideBlend = remote.slideWeight;
+    const slideTorso = slideBlend * 0.36;
+    const slideArm = slideBlend * 0.24;
+
+    const desiredY = remote.targetPosition.y - PLAYER.height + 0.18 - bodyBob - slideBlend * 0.96;
+    remote.group.position.y = THREE.MathUtils.damp(remote.group.position.y, desiredY, remote.sliding ? 18 : 10, delta);
+
+    remote.head.rotation.x = THREE.MathUtils.clamp(remote.targetPitch * 0.35 + slideBlend * 0.12, -0.55, 0.58);
+    remote.torso.rotation.x = THREE.MathUtils.lerp(0, remote.targetPitch * 0.08, remote.aimWeight) + slideTorso;
+    remote.torso.rotation.z = Math.sin(remote.stepTime) * 0.04 * strideStrength + slideBlend * 0.08;
+
+    const rightLegBase = Math.sin(stride) * 0.88 * strideStrength;
+    const leftLegBase = -Math.sin(stride) * 0.88 * strideStrength;
+    remote.rightLeg.rotation.x = THREE.MathUtils.lerp(rightLegBase, 0.96, slideBlend);
+    remote.leftLeg.rotation.x = THREE.MathUtils.lerp(leftLegBase, -0.3, slideBlend);
+    remote.rightLeg.rotation.z = 0.04 + slideBlend * 0.24;
+    remote.leftLeg.rotation.z = -0.04 - slideBlend * 0.18;
+
+    remote.rightArm.rotation.x =
+      THREE.MathUtils.lerp(-0.42, -1.1, remote.aimWeight) -
+      Math.sin(stride) * 0.42 * strideStrength -
+      reloadArc * 0.4 -
+      actionArc * (currentWeapon.isMelee ? 0.52 : 0.18) -
+      slideArm;
+    remote.leftArm.rotation.x =
+      THREE.MathUtils.lerp(-0.18, -0.92, remote.aimWeight) +
+      Math.sin(stride) * 0.36 * strideStrength -
+      reloadArc * 0.22 +
+      actionArc * (currentWeapon.isMelee ? 0.18 : 0.08) -
+      slideArm * 0.56;
+    remote.rightArm.rotation.z =
+      THREE.MathUtils.lerp(0.2, 0.08, remote.aimWeight) +
+      reloadArc * 0.1 +
+      actionArc * (currentWeapon.isMelee ? 0.36 : 0.08) +
+      slideBlend * 0.08;
+    remote.leftArm.rotation.z =
+      THREE.MathUtils.lerp(-0.28, -0.12, remote.aimWeight) -
+      reloadArc * 0.28 -
+      actionArc * (currentWeapon.isMelee ? 0.16 : 0.04) -
+      slideBlend * 0.06;
+
+    remote.weaponMount.position.set(
+      THREE.MathUtils.lerp(pose.mountHip[0], pose.mountAim[0], remote.aimWeight) + reloadArc * pose.reloadMount[0],
+      THREE.MathUtils.lerp(pose.mountHip[1], pose.mountAim[1], remote.aimWeight) - reloadArc * pose.reloadMount[1] - slideBlend * 0.24,
+      THREE.MathUtils.lerp(pose.mountHip[2], pose.mountAim[2], remote.aimWeight) - reloadArc * pose.reloadMount[2] + slideBlend * 0.12
+    );
+
+    const weaponModel = remote.activeWeaponModel;
+    weaponModel.group.rotation.set(
+      THREE.MathUtils.lerp(pose.rotationHip[0], pose.rotationAim[0], remote.aimWeight) -
+        reloadArc * pose.reloadRotation[0] -
+        actionArc * (currentWeapon.isMelee ? 0.82 : 0.12) +
+        slideBlend * 0.18,
+      THREE.MathUtils.lerp(pose.rotationHip[1], pose.rotationAim[1], remote.aimWeight) +
+        reloadArc * pose.reloadRotation[1] +
+        actionArc * (currentWeapon.isMelee ? 0.24 : 0.06),
+      THREE.MathUtils.lerp(pose.rotationHip[2], pose.rotationAim[2], remote.aimWeight) +
+        reloadArc * pose.reloadRotation[2] -
+        actionArc * (currentWeapon.isMelee ? 0.64 : 0.04) +
+        slideBlend * 0.12
+    );
+    weaponModel.group.position.set(
+      THREE.MathUtils.lerp(pose.localHip[0], pose.localAim[0], remote.aimWeight),
+      THREE.MathUtils.lerp(pose.localHip[1], pose.localAim[1], remote.aimWeight) - reloadArc * 0.06 + actionArc * (currentWeapon.isMelee ? 0.08 : 0) - slideBlend * 0.08,
+      THREE.MathUtils.lerp(pose.localHip[2], pose.localAim[2], remote.aimWeight) + actionArc * (currentWeapon.isMelee ? 0.08 : 0) + slideBlend * 0.06
+    );
+
+    remote.barrelSpin = THREE.MathUtils.damp(
+      remote.barrelSpin || 0,
+      remote.firing && currentWeapon.type === "minigun" ? currentWeapon.spinSpeed : 0,
+      8,
+      delta
+    );
+    if (weaponModel.barrels) {
+      weaponModel.barrels.rotation.z += remote.barrelSpin * delta;
+    }
+    if (weaponModel.drum) {
+      weaponModel.drum.rotation.x += delta * (remote.firing ? 10 : 2);
+    }
+    if (weaponModel.bolt) {
+      weaponModel.bolt.position.z = THREE.MathUtils.damp(
+        weaponModel.bolt.position.z,
+        remote.action > 0 ? -0.12 : -0.02,
+        16,
+        delta
+      );
+    }
+    if (weaponModel.pump) {
+      weaponModel.pump.position.z = THREE.MathUtils.damp(
+        weaponModel.pump.position.z,
+        -0.42 - actionArc * 0.22,
+        12,
+        delta
+      );
+    }
+    if (weaponModel.scopeGlass) {
+      weaponModel.scopeGlass.material.emissiveIntensity = THREE.MathUtils.damp(
+        weaponModel.scopeGlass.material.emissiveIntensity || 0.3,
+        remote.aiming ? 0.85 : 0.3,
+        8,
+        delta
+      );
+    }
+    if (weaponModel.pilotLight) {
+      weaponModel.pilotLight.material.emissiveIntensity = THREE.MathUtils.damp(
+        weaponModel.pilotLight.material.emissiveIntensity || 0.45,
+        currentWeapon.type === "flamethrower"
+          ? remote.firing
+            ? 1.35
+            : 0.55
+          : 0.2,
+        10,
+        delta
+      );
+    }
+
+    remote.flashLife = Math.max(0, (remote.flashLife || 0) - delta);
+    weaponModel.flash.visible = remote.flashLife > 0 && !currentWeapon.isMelee;
+    weaponModel.flash.material.opacity = Math.min(1, (remote.flashLife || 0) / 0.05);
   }
 
   function updateRemotePlayers(delta) {
@@ -4374,12 +5510,19 @@ function bootstrap() {
         removeRemotePlayer(playerId);
         return;
       }
-      entry.group.position.lerp(entry.targetPosition, entry.isDead ? smoothing * 0.55 : smoothing);
+      const beforeX = entry.group.position.x;
+      const beforeZ = entry.group.position.z;
+      entry.group.position.x = THREE.MathUtils.lerp(entry.group.position.x, entry.targetPosition.x, entry.isDead ? smoothing * 0.55 : smoothing);
+      entry.group.position.z = THREE.MathUtils.lerp(entry.group.position.z, entry.targetPosition.z, entry.isDead ? smoothing * 0.55 : smoothing);
       const yawDelta = Math.atan2(
         Math.sin(entry.targetYaw - entry.group.rotation.y),
         Math.cos(entry.targetYaw - entry.group.rotation.y)
       );
       entry.group.rotation.y += yawDelta * (entry.isDead ? smoothing * 0.35 : smoothing);
+      const distanceMoved = Math.hypot(entry.group.position.x - beforeX, entry.group.position.z - beforeZ);
+      const instantSpeed = delta > 0 ? distanceMoved / delta : 0;
+      entry.moveSpeed = THREE.MathUtils.damp(entry.moveSpeed || 0, instantSpeed, 10, delta);
+      updateRemotePlayerPose(entry, delta);
     });
   }
 
@@ -4414,6 +5557,12 @@ function bootstrap() {
     zombieKills = Number.isFinite(Number(selfState.zombieKills))
       ? Number(selfState.zombieKills)
       : zombieKills;
+    miniGameScore = Number.isFinite(Number(selfState.miniGameScore))
+      ? Math.max(miniGameScore, Number(selfState.miniGameScore))
+      : miniGameScore;
+    miniGameProgressText = typeof selfState.miniGameProgress === "string"
+      ? selfState.miniGameProgress
+      : miniGameProgressText;
     multiplayerRespawnAt = Number.isFinite(nextRespawnAt)
       ? nextRespawnAt
       : multiplayerRespawnAt;
@@ -4722,6 +5871,29 @@ function bootstrap() {
     multiplayerSyncInFlight = true;
     try {
       const currentWeapon = getSelectedWeapon();
+      const nowSeconds = performance.now() / 1000;
+      const slideActive = nowSeconds < slideActiveUntil;
+      const sprintIntent = selectedControlScheme === CONTROL_SCHEMES.pad
+        ? controls.sprint && touchMoveVector.length() > 0.2
+        : controls.sprint && controls.forward;
+      const sprinting = !playerIsDead && (slideActive || (sprintIntent && !sprintExhausted && sprintEnergy > 0));
+      const aimingNow =
+        singlePlayerStarted &&
+        pointerLocked &&
+        controls.aiming &&
+        currentWeapon.supportsAim &&
+        !isReloading &&
+        !playerIsDead;
+      const firingNow =
+        singlePlayerStarted &&
+        pointerLocked &&
+        controls.shooting &&
+        !isReloading &&
+        !playerIsDead;
+      const reloadPhase =
+        isReloading && currentWeapon.reloadTime > 0
+          ? 1 - reloadTimer / currentWeapon.reloadTime
+          : 0;
       const response = await fetch("/api/multiplayer/update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -4734,6 +5906,16 @@ function bootstrap() {
           yaw: player.yaw,
           pitch: player.pitch,
           weapon: currentWeapon.label,
+          weaponType: currentWeapon.type,
+          aiming: aimingNow,
+          firing: firingNow,
+          sprinting: sprinting,
+          sliding: slideActive,
+          reloading: isReloading,
+          reloadPhase: reloadPhase,
+          action: weaponAction,
+          miniGameScore: multiplayerVariant === MULTIPLAYER_VARIANTS.arcade ? Math.round(miniGameScore) : undefined,
+          miniGameProgress: multiplayerVariant === MULTIPLAYER_VARIANTS.arcade ? miniGameProgressText : undefined,
         }),
       });
 
@@ -4826,6 +6008,7 @@ function bootstrap() {
     scheduleChunksAroundPlayer(false);
     processBuildQueue();
     updateZombies(delta);
+    updateMiniGameState(delta);
     updateDroppedWeapons(delta);
     updateDynamicBlocks(delta);
     updateDebris(delta);
@@ -5085,6 +6268,7 @@ function bootstrap() {
       weaponAction > 0
         ? Math.sin(THREE.MathUtils.clamp(actionProgress, 0, 1) * Math.PI)
         : 0;
+    const slideBlend = slideActive ? 1 : 0;
 
     weaponTargetPosition.set(
       THREE.MathUtils.lerp(pose.hipPosition[0], pose.aimPosition[0], aimWeight) +
@@ -5114,6 +6298,15 @@ function bootstrap() {
         reloadArc * pose.reloadRotation[2] +
         actionArc * pose.actionRotation[2]
     );
+
+    if (slideBlend > 0) {
+      weaponTargetPosition.x += 0.08;
+      weaponTargetPosition.y -= 0.34;
+      weaponTargetPosition.z += 0.18;
+      weaponTargetRotation.x += 0.44;
+      weaponTargetRotation.y += 0.05;
+      weaponTargetRotation.z += 0.24;
+    }
 
     if (currentWeapon.isMelee) {
       weaponTargetPosition.z += weaponAction * 0.18;
@@ -6209,7 +7402,10 @@ function bootstrap() {
 
   function updateZombies(delta) {
     if (currentMode === MODES.multiplayer) {
-      if (multiplayerVariant !== MULTIPLAYER_VARIANTS.horde) {
+      const multiplayerZombieMode =
+        multiplayerVariant === MULTIPLAYER_VARIANTS.horde ||
+        (multiplayerVariant === MULTIPLAYER_VARIANTS.arcade && activeMiniGameUsesZombies());
+      if (!multiplayerZombieMode) {
         if (activeZombies.length > 0) {
           clearZombies();
         }
@@ -6242,7 +7438,8 @@ function bootstrap() {
       return;
     }
 
-    if (currentMode !== MODES.zombie) {
+    const soloZombieMode = currentMode === MODES.zombie || (currentMode === MODES.minigames && activeMiniGameUsesZombies());
+    if (!soloZombieMode) {
       return;
     }
 
@@ -6548,7 +7745,7 @@ function bootstrap() {
 
     if (
       currentMode === MODES.multiplayer &&
-      multiplayerVariant === MULTIPLAYER_VARIANTS.horde &&
+      (multiplayerVariant === MULTIPLAYER_VARIANTS.horde || (multiplayerVariant === MULTIPLAYER_VARIANTS.arcade && activeMiniGameUsesZombies())) &&
       zombie.isRemoteSync &&
       multiplayerPlayerId
     ) {
@@ -6637,66 +7834,86 @@ function bootstrap() {
         : 0;
     const bodyBob = Math.abs(Math.cos(bobTime * 2)) * 0.16 * strideStrength;
     const followAlpha = delta > 0 ? 1 - Math.exp(-10 * delta) : 1;
+    const slideBlend = slideActive ? 1 : 0;
 
     avatarTargetPosition.copy(player.position);
-    avatarTargetPosition.y -= PLAYER.height - 0.18 - bodyBob;
+    avatarTargetPosition.y -= PLAYER.height - 0.18 - bodyBob + slideBlend * -1.28;
     playerAvatar.group.position.lerp(avatarTargetPosition, followAlpha);
     playerAvatar.group.rotation.y = player.yaw;
 
-    playerAvatar.head.rotation.x = THREE.MathUtils.clamp(player.pitch * 0.35, -0.45, 0.45);
-    playerAvatar.torso.rotation.x = THREE.MathUtils.lerp(0, player.pitch * 0.08, aimWeight);
-    playerAvatar.torso.rotation.z = Math.sin(bobTime) * 0.04 * strideStrength;
+    playerAvatar.head.rotation.x = THREE.MathUtils.clamp(player.pitch * 0.35 + slideBlend * 0.16, -0.45, 0.56);
+    playerAvatar.torso.rotation.x =
+      THREE.MathUtils.lerp(0, player.pitch * 0.08, aimWeight) + slideBlend * 0.4;
+    playerAvatar.torso.rotation.z = Math.sin(bobTime) * 0.04 * strideStrength + slideBlend * 0.09;
 
-    playerAvatar.rightLeg.rotation.x = Math.sin(stride) * 0.88 * strideStrength;
-    playerAvatar.leftLeg.rotation.x = -Math.sin(stride) * 0.88 * strideStrength;
-    playerAvatar.rightLeg.rotation.z = 0.04;
-    playerAvatar.leftLeg.rotation.z = -0.04;
+    playerAvatar.rightLeg.rotation.x = THREE.MathUtils.lerp(
+      Math.sin(stride) * 0.88 * strideStrength,
+      1.12,
+      slideBlend
+    );
+    playerAvatar.leftLeg.rotation.x = THREE.MathUtils.lerp(
+      -Math.sin(stride) * 0.88 * strideStrength,
+      -0.34,
+      slideBlend
+    );
+    playerAvatar.rightLeg.rotation.z = 0.04 + slideBlend * 0.26;
+    playerAvatar.leftLeg.rotation.z = -0.04 - slideBlend * 0.18;
 
     playerAvatar.rightArm.rotation.x =
       THREE.MathUtils.lerp(-0.42, -1.1, aimWeight) -
       Math.sin(stride) * 0.42 * strideStrength -
       reloadArc * 0.4 -
-      actionArc * (currentWeapon.isMelee ? 0.52 : 0.18);
+      actionArc * (currentWeapon.isMelee ? 0.52 : 0.18) -
+      slideBlend * 0.32;
     playerAvatar.leftArm.rotation.x =
       THREE.MathUtils.lerp(-0.18, -0.92, aimWeight) +
       Math.sin(stride) * 0.36 * strideStrength -
       reloadArc * 0.22 +
-      actionArc * (currentWeapon.isMelee ? 0.18 : 0.08);
+      actionArc * (currentWeapon.isMelee ? 0.18 : 0.08) -
+      slideBlend * 0.18;
     playerAvatar.rightArm.rotation.z =
       THREE.MathUtils.lerp(0.2, 0.08, aimWeight) +
       reloadArc * 0.1 +
-      actionArc * (currentWeapon.isMelee ? 0.36 : 0.08);
+      actionArc * (currentWeapon.isMelee ? 0.36 : 0.08) +
+      slideBlend * 0.12;
     playerAvatar.leftArm.rotation.z =
       THREE.MathUtils.lerp(-0.28, -0.12, aimWeight) -
       reloadArc * 0.28 -
-      actionArc * (currentWeapon.isMelee ? 0.16 : 0.04);
+      actionArc * (currentWeapon.isMelee ? 0.16 : 0.04) -
+      slideBlend * 0.08;
 
     playerAvatar.weaponMount.position.set(
       THREE.MathUtils.lerp(pose.mountHip[0], pose.mountAim[0], aimWeight) +
         reloadArc * pose.reloadMount[0],
       THREE.MathUtils.lerp(pose.mountHip[1], pose.mountAim[1], aimWeight) -
-        reloadArc * pose.reloadMount[1],
+        reloadArc * pose.reloadMount[1] -
+        slideBlend * 0.28,
       THREE.MathUtils.lerp(pose.mountHip[2], pose.mountAim[2], aimWeight) -
-        reloadArc * pose.reloadMount[2]
+        reloadArc * pose.reloadMount[2] +
+        slideBlend * 0.12
     );
     avatarWeapon.group.rotation.set(
       THREE.MathUtils.lerp(pose.rotationHip[0], pose.rotationAim[0], aimWeight) -
         reloadArc * pose.reloadRotation[0] -
-        actionArc * (currentWeapon.isMelee ? 0.82 : 0.12),
+        actionArc * (currentWeapon.isMelee ? 0.82 : 0.12) +
+        slideBlend * 0.2,
       THREE.MathUtils.lerp(pose.rotationHip[1], pose.rotationAim[1], aimWeight) +
         reloadArc * pose.reloadRotation[1] +
         actionArc * (currentWeapon.isMelee ? 0.24 : 0.06),
       THREE.MathUtils.lerp(pose.rotationHip[2], pose.rotationAim[2], aimWeight) +
         reloadArc * pose.reloadRotation[2] -
-        actionArc * (currentWeapon.isMelee ? 0.64 : 0.04)
+        actionArc * (currentWeapon.isMelee ? 0.64 : 0.04) +
+        slideBlend * 0.14
     );
     avatarWeapon.group.position.set(
       THREE.MathUtils.lerp(pose.localHip[0], pose.localAim[0], aimWeight),
       THREE.MathUtils.lerp(pose.localHip[1], pose.localAim[1], aimWeight) -
         reloadArc * 0.06 +
-        actionArc * (currentWeapon.isMelee ? 0.08 : 0),
+        actionArc * (currentWeapon.isMelee ? 0.08 : 0) -
+        slideBlend * 0.1,
       THREE.MathUtils.lerp(pose.localHip[2], pose.localAim[2], aimWeight) +
-        actionArc * (currentWeapon.isMelee ? 0.08 : 0)
+        actionArc * (currentWeapon.isMelee ? 0.08 : 0) +
+        slideBlend * 0.08
     );
 
     if (avatarWeapon.barrels) {
@@ -6815,6 +8032,12 @@ function bootstrap() {
     const inHordeLobby =
       currentMode === MODES.multiplayer &&
       multiplayerVariant === MULTIPLAYER_VARIANTS.horde;
+    const inArcadeRoom =
+      currentMode === MODES.multiplayer &&
+      multiplayerVariant === MULTIPLAYER_VARIANTS.arcade;
+    const inSoloMiniGames = currentMode === MODES.minigames;
+    const inAnyMiniGame = inArcadeRoom || inSoloMiniGames;
+    const activeMiniGame = inAnyMiniGame ? getMiniGameConfig(getActiveMiniGameId() || DEFAULT_MINI_GAME_ID) : null;
 
     let modeText = t("status.modeMenu");
     if (singlePlayerStarted) {
@@ -6827,13 +8050,17 @@ function bootstrap() {
           : thirdPersonEnabled
             ? "Third Person"
             : "First Person";
-      const modeLabel = inHordeLobby
-        ? t("status.modePrefix.horde")
-        : inPvpLobby
-          ? t("status.modePrefix.pvp")
-          : currentMode === MODES.zombie
-            ? t("status.modePrefix.zombie")
-            : t("status.modePrefix.single");
+      const modeLabel = inArcadeRoom
+        ? t("status.modePrefix.arcade")
+        : inHordeLobby
+          ? t("status.modePrefix.horde")
+          : inPvpLobby
+            ? t("status.modePrefix.pvp")
+            : inSoloMiniGames
+              ? t("status.modePrefix.minigames")
+              : currentMode === MODES.zombie
+                ? t("status.modePrefix.zombie")
+                : t("status.modePrefix.single");
       const tail = pointerLocked
         ? playerIsDead
           ? t("status.downed")
@@ -6873,54 +8100,79 @@ function bootstrap() {
       max: PLAYER.maxHealth,
       potion: potionStatus,
     });
-    zombieReadout.textContent = inHordeLobby
-      ? !multiplayerRoomStarted
-        ? t("status.roomWaiting", {
-            players: multiplayerRoomPlayerCount,
-            needed: multiplayerRoomMinPlayers,
-          })
-        : t("status.playersZombies", {
-            players: remotePlayers.size + (multiplayerPlayerId ? 1 : 0),
-            zombies: activeZombies.length,
-          })
-      : inPvpLobby
-        ? t("status.playersOnly", {
-            players: remotePlayers.size + (multiplayerPlayerId ? 1 : 0),
-          })
-        : currentMode === MODES.zombie
-          ? t("status.zombies", {
-              alive: activeZombies.length,
-              down: zombieKills,
+
+    if (inAnyMiniGame && activeMiniGame) {
+      const remaining = Math.ceil(getMiniGameTimeRemaining());
+      const leader = inArcadeRoom && multiplayerRoomLeaderboard.length ? multiplayerRoomLeaderboard[0] : null;
+      const timerText = selectedLanguage === LANGUAGES.zh
+        ? getLocalizedMiniGameLabel(activeMiniGame.id) + " • 剩余 " + remaining + "s"
+        : getLocalizedMiniGameLabel(activeMiniGame.id) + " • " + remaining + "s left";
+      zombieReadout.textContent = inArcadeRoom
+        ? timerText + (selectedLanguage === LANGUAGES.zh ? " • 玩家 " : " • players ") + String(remotePlayers.size + (multiplayerPlayerId ? 1 : 0))
+        : timerText;
+
+      let leadText = "";
+      if (leader) {
+        leadText = selectedLanguage === LANGUAGES.zh
+          ? "领先 " + String(leader.name || "Player") + " " + Math.round(Number(leader.score || 0))
+          : "Lead " + String(leader.name || "Player") + " " + Math.round(Number(leader.score || 0));
+      }
+      const progressText = miniGameProgressText ? " • " + miniGameProgressText : "";
+      hitsReadout.textContent = selectedLanguage === LANGUAGES.zh
+        ? "小游戏分数：" + Math.round(miniGameScore) + progressText + (leadText ? " • " + leadText : "")
+        : "Mini score: " + Math.round(miniGameScore) + progressText + (leadText ? " • " + leadText : "");
+    } else {
+      zombieReadout.textContent = inHordeLobby
+        ? !multiplayerRoomStarted
+          ? t("status.roomWaiting", {
+              players: multiplayerRoomPlayerCount,
+              needed: multiplayerRoomMinPlayers,
             })
-          : t("status.zombiesOffline");
+          : t("status.playersZombies", {
+              players: remotePlayers.size + (multiplayerPlayerId ? 1 : 0),
+              zombies: activeZombies.length,
+            })
+        : inPvpLobby
+          ? t("status.playersOnly", {
+              players: remotePlayers.size + (multiplayerPlayerId ? 1 : 0),
+            })
+          : currentMode === MODES.zombie
+            ? t("status.zombies", {
+                alive: activeZombies.length,
+                down: zombieKills,
+              })
+            : t("status.zombiesOffline");
+
+      const respawnRemaining = Math.max(0, multiplayerRespawnAt - Date.now() / 1000);
+      const tailText = playerIsDead
+        ? t("status.respawn", { seconds: respawnRemaining.toFixed(1) })
+        : inHordeLobby && !multiplayerRoomStarted
+          ? t("status.waiting")
+          : t("status.sync", { hz: Math.round(1 / MULTIPLAYER.pollInterval) });
+      hitsReadout.textContent = inHordeLobby
+        ? t("status.coop", {
+            zombieKills: zombieKills,
+            kills: multiplayerKills,
+            deaths: multiplayerDeaths,
+            tail: tailText,
+          })
+        : inPvpLobby
+          ? t("status.pvp", {
+              kills: multiplayerKills,
+              deaths: multiplayerDeaths,
+              tail: tailText,
+            })
+          : currentMode === MODES.zombie
+            ? t("status.score", { kills: zombieKills, shots: totalShots })
+            : t("status.hits", { hits: totalHits, shots: totalShots });
+    }
+
     weaponReadout.textContent = t("status.weapon", { weapon: currentWeapon.label });
     ammoReadout.textContent = currentWeapon.isMelee
       ? t("status.ammoBlade")
       : isReloading
         ? t("status.ammoRefilling", { mag: ammoInMag, reserve: reserveAmmo })
         : t("status.ammo", { mag: ammoInMag, reserve: reserveAmmo });
-    const respawnRemaining = Math.max(0, multiplayerRespawnAt - Date.now() / 1000);
-    const tailText = playerIsDead
-      ? t("status.respawn", { seconds: respawnRemaining.toFixed(1) })
-      : inHordeLobby && !multiplayerRoomStarted
-        ? t("status.waiting")
-      : t("status.sync", { hz: Math.round(1 / MULTIPLAYER.pollInterval) });
-    hitsReadout.textContent = inHordeLobby
-      ? t("status.coop", {
-          zombieKills: zombieKills,
-          kills: multiplayerKills,
-          deaths: multiplayerDeaths,
-          tail: tailText,
-        })
-      : inPvpLobby
-        ? t("status.pvp", {
-            kills: multiplayerKills,
-            deaths: multiplayerDeaths,
-            tail: tailText,
-          })
-        : currentMode === MODES.zombie
-          ? t("status.score", { kills: zombieKills, shots: totalShots })
-          : t("status.hits", { hits: totalHits, shots: totalShots });
 
     coordsReadout.textContent = t("status.coords", {
       x: Math.round(player.position.x),

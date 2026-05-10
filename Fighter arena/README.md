@@ -33,4 +33,3 @@ python3 server.py 80
 Then open `http://<your-server-ip>/`.
 If you keep port `4174` instead, make sure TCP `4174` is allowed in your cloud
 firewall or security group.
-
