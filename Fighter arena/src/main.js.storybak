@@ -12,11 +12,9 @@ try {
   bootstrap();
 } catch (error) {
   console.error(error);
-  const detail =
-    error && error.name
-      ? error.name + ": " + (error.message || "Unknown error")
-      : "The world failed to start. Check the browser console for details.";
-  setBootMessage(detail);
+  setBootMessage(
+    "The world failed to start. Check the browser console for details."
+  );
 }
 
 function bootstrap() {
@@ -447,7 +445,6 @@ function bootstrap() {
   const MODES = {
     sandbox: "sandbox",
     zombie: "zombie",
-    story: "story",
     minigames: "minigames",
     multiplayer: "multiplayer",
   };
@@ -556,160 +553,6 @@ function bootstrap() {
     { x: -44, z: 56 },
     { x: -62, z: -34 },
     { x: 60, z: -52 },
-  ];
-
-  const STORY_PROGRESS_STORAGE_KEY = "fighterArena.storyProgress.v1";
-  const STORY_CURRENT_CHAPTER_STORAGE_KEY = "fighterArena.storyChapter.v1";
-  const STORY_MONSTERS = {
-    shambler: {
-      id: "shambler",
-      health: 110,
-      walkSpeed: 7.2,
-      chaseRange: 150,
-      attackRange: 4.9,
-      attackDamage: 14,
-      attackInterval: 1.05,
-      despawnRange: 220,
-      scale: 1,
-      flesh: 0x5a8b48,
-      cloth: 0x413f57,
-      glow: 0xb8ff89,
-      emissive: 0x3b5d16,
-      badgeFill: "#89ff72",
-      badgeEdge: "#d64040",
-    },
-    runner: {
-      id: "runner",
-      health: 72,
-      walkSpeed: 12,
-      chaseRange: 175,
-      attackRange: 4.2,
-      attackDamage: 10,
-      attackInterval: 0.74,
-      despawnRange: 240,
-      scale: 0.86,
-      flesh: 0x7ba04d,
-      cloth: 0x2a3948,
-      glow: 0xd9ff89,
-      emissive: 0x58711c,
-      badgeFill: "#c7ff80",
-      badgeEdge: "#7ccf43",
-    },
-    brute: {
-      id: "brute",
-      health: 260,
-      walkSpeed: 5.4,
-      chaseRange: 145,
-      attackRange: 5.6,
-      attackDamage: 24,
-      attackInterval: 1.38,
-      despawnRange: 220,
-      scale: 1.34,
-      flesh: 0x6a6f37,
-      cloth: 0x5a4637,
-      glow: 0xffcf6c,
-      emissive: 0x6d340f,
-      badgeFill: "#ffcf6c",
-      badgeEdge: "#f16739",
-    },
-    ember: {
-      id: "ember",
-      health: 148,
-      walkSpeed: 8.4,
-      chaseRange: 165,
-      attackRange: 5,
-      attackDamage: 18,
-      attackInterval: 0.96,
-      despawnRange: 230,
-      scale: 1.02,
-      flesh: 0x7b5441,
-      cloth: 0x452f2a,
-      glow: 0xff8a54,
-      emissive: 0x7a2410,
-      badgeFill: "#ff9c66",
-      badgeEdge: "#f04c2c",
-    },
-  };
-
-  const STORY_CHAPTERS = [
-    {
-      id: "story-1",
-      index: 1,
-      map: "deadfront",
-      labels: { en: "Cold Landing", zh: "冷降点" },
-      summaries: { en: "Sweep the broken outer street and clear the first breach line.", zh: "清掉破碎外街，打开第一道突破口。" },
-      spawn: { x: -18, z: 18 },
-      scene: { sky: 0xc7e7ff, fog: 0xc7e7ff, light: 0xf1fbff, sun: 0xfff2d6 },
-      goalKills: 10,
-      maxAlive: 4,
-      spawnInterval: 1.35,
-      lineup: ["shambler", "shambler", "runner", "shambler", "runner", "shambler", "runner", "shambler", "runner", "brute"],
-    },
-    {
-      id: "story-2",
-      index: 2,
-      map: "courtyard",
-      labels: { en: "Courtyard Sweep", zh: "庭院清扫" },
-      summaries: { en: "Fight through fenced homes and keep the center court from collapsing.", zh: "穿过围栏房区，守住中庭不让怪潮压垮。" },
-      spawn: { x: 4, z: 0 },
-      scene: { sky: 0xd7ebc0, fog: 0xd7ebc0, light: 0xf8ffe7, sun: 0xfff5cb },
-      goalKills: 12,
-      maxAlive: 5,
-      spawnInterval: 1.2,
-      lineup: ["shambler", "runner", "runner", "shambler", "ember", "runner", "runner", "ember", "shambler", "runner", "brute", "ember"],
-    },
-    {
-      id: "story-3",
-      index: 3,
-      map: "canyonline",
-      labels: { en: "Dust Corridor", zh: "尘土走廊" },
-      summaries: { en: "Use the canyon choke points to stop fast targets before they flood the lane.", zh: "利用峡谷卡口，在高速怪物冲满通道前挡住它们。" },
-      spawn: { x: 0, z: -10 },
-      scene: { sky: 0xffdcb0, fog: 0xf0c89c, light: 0xfff4de, sun: 0xffd08e },
-      goalKills: 14,
-      maxAlive: 5,
-      spawnInterval: 1.05,
-      lineup: ["runner", "runner", "runner", "ember", "runner", "shambler", "runner", "ember", "runner", "shambler", "runner", "brute", "ember", "runner"],
-    },
-    {
-      id: "story-4",
-      index: 4,
-      map: "refinery",
-      labels: { en: "Refinery Breach", zh: "炼厂缺口" },
-      summaries: { en: "Retake the fuel yard, weave through tanks, and break the heavy push.", zh: "夺回燃料场，绕开罐区，顶住重装推进。" },
-      spawn: { x: -10, z: -2 },
-      scene: { sky: 0xc9d4dd, fog: 0xc0ccd7, light: 0xf4fbff, sun: 0xe8f0ff },
-      goalKills: 16,
-      maxAlive: 6,
-      spawnInterval: 1.02,
-      lineup: ["shambler", "runner", "ember", "runner", "ember", "brute", "runner", "runner", "ember", "brute", "shambler", "runner", "ember", "brute", "runner", "ember"],
-    },
-    {
-      id: "story-5",
-      index: 5,
-      map: "farmhold",
-      labels: { en: "Farmhold Night", zh: "农场夜守" },
-      summaries: { en: "Lock down the barn alleys and survive a long mixed pack assault.", zh: "守住谷仓通道，扛过长时间的混编怪物突击。" },
-      spawn: { x: 10, z: 12 },
-      scene: { sky: 0x7fa0c8, fog: 0x8ca1b6, light: 0xcfe7ff, sun: 0xc9d3ff },
-      goalKills: 18,
-      maxAlive: 6,
-      spawnInterval: 0.95,
-      lineup: ["runner", "runner", "ember", "shambler", "runner", "ember", "brute", "runner", "ember", "shambler", "runner", "brute", "ember", "runner", "ember", "brute", "runner", "ember"],
-    },
-    {
-      id: "story-6",
-      index: 6,
-      map: "lastfort",
-      labels: { en: "Last Fort", zh: "最后堡垒" },
-      summaries: { en: "Push through the final fort line and finish the first campaign batch.", zh: "穿过最后一道堡垒防线，打完第一批剧情战役。" },
-      spawn: { x: 0, z: 6 },
-      scene: { sky: 0xb9c0ff, fog: 0xb7bfd6, light: 0xf5f7ff, sun: 0xffdfba },
-      goalKills: 22,
-      maxAlive: 7,
-      spawnInterval: 0.88,
-      lineup: ["runner", "ember", "brute", "runner", "ember", "runner", "brute", "ember", "runner", "ember", "brute", "runner", "ember", "runner", "brute", "ember", "runner", "brute", "ember", "runner", "ember", "brute"],
-    },
   ];
 
   const CONTROL_SCHEMES = {
@@ -834,7 +677,6 @@ function bootstrap() {
       "touch.reload": "Reload",
       "touch.heal": "Heal",
       "touch.view": "View",
-      "touch.rotate": "Rotate",
       "touch.wall": "Wall",
       "touch.pickup": "Pick Up",
       "touch.shop": "Shop",
@@ -857,7 +699,6 @@ function bootstrap() {
       "boot.multiplayerNotReady": "Multiplayer session is not ready yet.",
       "boot.sessionExpired": "Multiplayer session expired. Rejoin from menu.",
       "boot.unavailable": "Multiplayer unavailable. Confirm /api endpoints are running.",
-    "boot.shareAddress": "Share this address: {origin}",
       "boot.roomNotFound": "Room not found. Refresh the list or check the private code.",
       "boot.roomWaiting": "Room waiting for players: {current}/{needed}.",
       "boot.roomStarted": "Room is live. Zombie waves are starting.",
@@ -866,13 +707,6 @@ function bootstrap() {
       "boot.wallCooldown": "Wall ready in {seconds}s.",
       "boot.wallBlocked": "Need a little more open space to place that wall.",
       "boot.chatUnavailable": "Chat is not ready yet.",
-      "boot.rotateLandscape": "Trying to rotate into landscape mode.",
-      "boot.rotatePortrait": "Trying to rotate into portrait mode.",
-      "boot.rotateUnsupported": "This browser blocked rotation. Try allowing fullscreen or rotate your phone manually.",
-      "boot.phoneEmuOn": "Phone emulation on. Desktop now mirrors the mobile layout.",
-      "boot.phoneEmuOff": "Phone emulation off. Desktop layout is back.",
-      "phoneEmu.rotateLandscape": "Landscape",
-      "phoneEmu.rotatePortrait": "Portrait",
       "prompt.multiplayerName": "Multiplayer name",
       "prompt.shareCode": "Share this room code",
       "roomBrowser.eyebrow": "Rooms",
@@ -1068,7 +902,6 @@ function bootstrap() {
       "touch.reload": "换弹",
       "touch.heal": "回血",
       "touch.view": "视角",
-      "touch.rotate": "旋转",
       "touch.wall": "墙",
       "touch.pickup": "拾取",
       "touch.shop": "商店",
@@ -1090,7 +923,6 @@ function bootstrap() {
       "boot.accountLoggedOut": "已经退出登录，现在是游客模式。",
       "boot.sessionExpired": "多人会话已过期，请回到菜单重新进入。",
       "boot.unavailable": "多人不可用，请确认 /api 服务正在运行。",
-    "boot.shareAddress": "让别人用这个地址进入：{origin}",
       "boot.roomNotFound": "没找到这个房间。请刷新列表，或者检查一下房间码。",
       "boot.roomWaiting": "房间还在等人：{current}/{needed}。",
       "boot.roomStarted": "房间开局了，僵尸开始刷新。",
@@ -1099,9 +931,6 @@ function bootstrap() {
       "boot.wallCooldown": "墙还要 {seconds}s 才能再放。",
       "boot.wallBlocked": "这里空间不够，放不了这堵墙。",
       "boot.chatUnavailable": "聊天现在还不能用。",
-      "boot.rotateLandscape": "正在切到横屏。",
-      "boot.rotatePortrait": "正在切到竖屏。",
-      "boot.rotateUnsupported": "这个浏览器不让页面强制旋转。你可以先允许全屏，或者手动转手机。",
       "prompt.multiplayerName": "多人名字",
       "prompt.shareCode": "复制这个房间码",
       "roomBrowser.eyebrow": "房间",
@@ -1191,110 +1020,11 @@ function bootstrap() {
     },
   };
 
-  Object.assign(TRANSLATIONS.en, {
-    "modes.story.tag": "Campaign",
-    "modes.story.title": "Story Mode",
-    "modes.story.description": "Push through chained missions, fight different monster types, and clear handcrafted maps with houses, choke points, and boss-heavy finales.",
-    "storyBrowser.eyebrow": "Story Mode",
-    "storyBrowser.title": "Campaign Map",
-    "storyBrowser.summary": "Move chapter by chapter through a full campaign. Each mission changes the map, the monster lineup, and the pressure.",
-    "storyBrowser.play": "Start Mission",
-    "storyBrowser.locked": "Locked",
-    "storyBrowser.complete": "Complete",
-    "storyBrowser.progress": "Mission {index} / {total}",
-    "storyBrowser.objective": "Clear {kills} monsters",
-    "brand.story.eyebrow": "Story Mode",
-    "status.modePrefix.story": "Story ",
-    "status.storyObjective": "Story: {chapter} • {progress}",
-    "status.storyThreats": "Left: {remaining} • Boss {bosses}",
-    "boot.storyLocked": "That story mission is still locked.",
-    "boot.storyStart": "Story mission {title} is live.",
-    "boot.storyClear": "Mission clear. Next chapter unlocked.",
-    "boot.storyCampaignClear": "Campaign clear. You finished the current story batch.",
-    "monster.shambler": "Shambler",
-    "monster.runner": "Runner",
-    "monster.brute": "Brute",
-    "monster.ember": "Ember Fiend",
-  });
-
-  Object.assign(TRANSLATIONS.zh, {
-    "modes.story.tag": "剧情",
-    "modes.story.title": "故事模式",
-    "modes.story.description": "一关一关推进剧情，打不同怪物，在带房子、路口和封锁线的手工地图里一路闯关。",
-    "storyBrowser.eyebrow": "故事模式",
-    "storyBrowser.title": "剧情地图",
-    "storyBrowser.summary": "按章节推进完整战役。每一关都会换地图主题、怪物阵容和压力节奏。",
-    "storyBrowser.play": "开始任务",
-    "storyBrowser.locked": "未解锁",
-    "storyBrowser.complete": "已完成",
-    "storyBrowser.progress": "任务 {index} / {total}",
-    "storyBrowser.objective": "清掉 {kills} 个怪物",
-    "brand.story.eyebrow": "故事模式",
-    "status.modePrefix.story": "剧情 ",
-    "status.storyObjective": "剧情：{chapter} • {progress}",
-    "status.storyThreats": "剩余怪物 {remaining} • Boss {bosses}",
-    "boot.storyLocked": "这关剧情还没有解锁。",
-    "boot.storyStart": "剧情任务 {title} 已开始。",
-    "boot.storyClear": "本关完成，下一关已解锁。",
-    "boot.storyCampaignClear": "当前剧情批次已全部完成。",
-    "monster.shambler": "慢行尸",
-    "monster.runner": "狂奔尸",
-    "monster.brute": "重甲尸",
-    "monster.ember": "余烬尸",
-  });
-
-  Object.assign(TRANSLATIONS.en, {
-    "shop.summary": "Spend Bitz to unlock more guns, then equip them from your loadout any time.",
-    "shop.credits": "Bitz: {credits}",
-    "shop.buy": "Buy",
-    "shop.equip": "Equip",
-    "shop.equipped": "Equipped",
-    "shop.owned": "Owned",
-    "shop.starter": "Starter",
-    "shop.buyPrice": "Unlock for {price} Bitz",
-    "shop.priceTag": "{price} Bitz",
-    "shop.rangeTag": "Range {range}m",
-    "touch.shopCompact": "Shop / Chat",
-    "panel.padCompact.line2": "Tap Pick / Heal to grab nearby gear, hold it to use a potion. Tap Wall to place a wall. Tap Shop / Chat to open the Bitz shop, and hold it to open Party chat.",
-    "boot.shopNoBitz": "Not enough Bitz yet.",
-    "boot.shopBought": "Unlocked {weapon}.",
-    "boot.devModeOn": "Developer Mode on. Every weapon, ammo pack, and Bitz stash is unlocked.",
-    "boot.devModeOff": "Developer Mode off. Your normal loadout is back.",
-  });
-
-  Object.assign(TRANSLATIONS.zh, {
-    "settings.summary": "把设置、账号、声音和布局都放到这里。登录后，这个浏览器里的布局、音量、武器栏和关键进度都会跟着账号一起保存。",
-    "brand.pvp.summary": "经典联机竞技场还在。你可以和朋友实时移动、互相对战，也能随时打开组队和聊天。",
-    "panel.pad.line1": "经典手机布局会把所有触控按钮都显示出来。左边摇杆移动，右边区域转视角，其他按钮负责开火、瞄准、跳跃、换弹、回血、搭墙、商店和聊天。",
-    "panel.pad.line2": "如果你觉得按钮太多，可以切到精简布局。手机模式下底部武器栏还能直接点，位置和大小也能继续用界面调试慢慢调。",
-    "panel.padCompact.line2": "轻点拾取 / 回血可以捡附近武器，按住它就用药水；轻点墙会搭墙；轻点商店 / 聊天会打开 Bitz 商店，按住它会打开组队聊天。你随时都能在菜单里切回经典布局。",
-    "shop.summary": "用 Bitz 购买更多武器。买完之后，随时都能从武器栏里切出来使用。",
-    "shop.credits": "Bitz：{credits}",
-    "shop.buy": "购买",
-    "shop.equip": "装备",
-    "shop.equipped": "已装备",
-    "shop.owned": "已拥有",
-    "shop.starter": "初始",
-    "shop.buyPrice": "花 {price} Bitz 解锁",
-    "shop.priceTag": "{price} Bitz",
-    "shop.rangeTag": "射程 {range}m",
-    "touch.shopCompact": "商店 / 聊天",
-    "boot.shopNoBitz": "Bitz 不够。",
-    "boot.shopBought": "已经解锁 {weapon}。",
-    "boot.devModeOn": "开发者模式已开启。所有武器、弹药和 Bitz 都已经给你了。",
-    "boot.devModeOff": "开发者模式已关闭，已经回到你原来的正常装备。",
-    "boot.phoneEmuOn": "手机模拟已开启。现在电脑会直接显示手机布局。",
-    "boot.phoneEmuOff": "手机模拟已关闭，已经回到电脑布局。",
-    "phoneEmu.rotateLandscape": "横屏",
-    "phoneEmu.rotatePortrait": "竖屏",
-  });
-
   const menuScreen = document.getElementById("menuScreen");
   const settingsOpenButton = document.getElementById("settingsOpenButton");
   const accountStatusChip = document.getElementById("accountStatusChip");
   const menuEyebrow = document.getElementById("menuEyebrow");
   const menuSummary = document.getElementById("menuSummary");
-  const GAME_BUILD_LABEL = "v2026.05.16e";
   const languageLabel = document.getElementById("languageLabel");
   const controlLabel = document.getElementById("controlLabel");
   const sensitivityLabel = document.getElementById("sensitivityLabel");
@@ -1319,7 +1049,6 @@ function bootstrap() {
   const controlFitOpenButton = document.getElementById("controlFitOpenButton");
   const singlePlayerButton = document.getElementById("singlePlayerButton");
   const zombieModeButton = document.getElementById("zombieModeButton");
-  const storyModeButton = document.getElementById("storyModeButton") || document.createElement("button");
   const multiplayerPvpButton = document.getElementById("multiplayerPvpButton");
   const multiplayerHordeButton = document.getElementById("multiplayerHordeButton");
   const miniGamesButton = document.getElementById("miniGamesButton");
@@ -1329,9 +1058,6 @@ function bootstrap() {
   const zombieModeTag = document.getElementById("zombieModeTag");
   const zombieModeTitle = document.getElementById("zombieModeTitle");
   const zombieModeDescription = document.getElementById("zombieModeDescription");
-  const storyModeTag = document.getElementById("storyModeTag") || document.createElement("span");
-  const storyModeTitle = document.getElementById("storyModeTitle") || document.createElement("strong");
-  const storyModeDescription = document.getElementById("storyModeDescription") || document.createElement("span");
   const multiplayerPvpTag = document.getElementById("multiplayerPvpTag");
   const multiplayerPvpTitle = document.getElementById("multiplayerPvpTitle");
   const multiplayerPvpDescription = document.getElementById("multiplayerPvpDescription");
@@ -1347,12 +1073,6 @@ function bootstrap() {
   const miniGameBrowserSummary = document.getElementById("miniGameBrowserSummary");
   const miniGameBrowserCloseButton = document.getElementById("miniGameBrowserCloseButton");
   const miniGameGrid = document.getElementById("miniGameGrid");
-  const storyBrowser = document.getElementById("storyBrowser") || document.createElement("div");
-  const storyBrowserEyebrow = document.getElementById("storyBrowserEyebrow") || document.createElement("p");
-  const storyBrowserTitle = document.getElementById("storyBrowserTitle") || document.createElement("h2");
-  const storyBrowserSummary = document.getElementById("storyBrowserSummary") || document.createElement("p");
-  const storyBrowserCloseButton = document.getElementById("storyBrowserCloseButton") || document.createElement("button");
-  const storyChapterGrid = document.getElementById("storyChapterGrid") || document.createElement("div");
   const settingsPanel = document.getElementById("settingsPanel");
   const settingsEyebrow = document.getElementById("settingsEyebrow");
   const settingsTitle = document.getElementById("settingsTitle");
@@ -1401,7 +1121,6 @@ function bootstrap() {
   const shopPanel = document.getElementById("shopPanel");
   const shopGrid = document.getElementById("shopGrid");
   const shopCredits = document.getElementById("shopCredits");
-  const shopCloseButton = document.getElementById("shopCloseButton");
   const shopEyebrow = document.getElementById("shopEyebrow");
   const shopTitle = document.getElementById("shopTitle");
   const shopSummary = document.getElementById("shopSummary");
@@ -1426,7 +1145,6 @@ function bootstrap() {
   const panelSoundUpButton = document.getElementById("panelSoundUpButton");
   const brandEyebrow = document.getElementById("brandEyebrow");
   const brandSummary = document.getElementById("brandSummary");
-  const buildTag = document.getElementById("buildTag");
   const modeReadout = document.getElementById("modeReadout");
   const healthReadout = document.getElementById("healthReadout");
   const zombieReadout = document.getElementById("zombieReadout");
@@ -1452,13 +1170,11 @@ function bootstrap() {
   const touchReloadButton = document.getElementById("touchReloadButton");
   const touchHealButton = document.getElementById("touchHealButton");
   const touchViewButton = document.getElementById("touchViewButton");
-  const touchRotateButton = document.getElementById("touchRotateButton");
   const touchWallButton = document.getElementById("touchWallButton");
   const touchPickupButton = document.getElementById("touchPickupButton");
   const touchShopButton = document.getElementById("touchShopButton");
   const touchChatButton = document.getElementById("touchChatButton");
   const socialHudButton = document.getElementById("socialHudButton");
-  const phoneEmuRotateButton = document.getElementById("phoneEmuRotateButton");
   const screenFitEditor = document.getElementById("screenFitEditor");
   const screenFitEyebrow = document.getElementById("screenFitEyebrow");
   const screenFitTitle = document.getElementById("screenFitTitle");
@@ -1667,8 +1383,6 @@ function bootstrap() {
   const remotePlayers = new Map();
   const remotePlayerHitMeshes = [];
   const solidObstacles = [];
-  const storyStructureIds = [];
-  const storyFloorMeshes = [];
   const solidObstacleMap = new Map();
   const solidObstacleMeshes = [];
   const localDefenseWalls = new Map();
@@ -1738,8 +1452,8 @@ function bootstrap() {
   let singlePlayerStarted = false;
   let lastTime = performance.now();
   let selectedWeaponIndex = 0;
-  const ownedWeapons = LOADOUT.map(function (weaponConfig) {
-    return Boolean(weaponConfig.starter);
+  const ownedWeapons = LOADOUT.map(function () {
+    return true;
   });
   const weaponStates = LOADOUT.map(function (weaponConfig) {
     return {
@@ -1801,7 +1515,6 @@ function bootstrap() {
   let multiplayerRoomMiniGameDuration = 0;
   let multiplayerRoomLeaderboard = [];
   let miniGameBrowserOpen = false;
-  let storyBrowserOpen = false;
   let roomBrowserOpen = false;
   let roomBrowserRooms = [];
   let roomBrowserPreferredVariant = MULTIPLAYER_VARIANTS.pvp;
@@ -1816,7 +1529,6 @@ function bootstrap() {
   let miniGameCheckpointIndex = 0;
   let miniGameCompleteAnnounced = false;
   let socialPanelOpen = false;
-  let shopPanelOpen = false;
   let multiplayerRoster = [];
   let multiplayerChat = [];
   let multiplayerChatLastId = 0;
@@ -1828,15 +1540,6 @@ function bootstrap() {
   let slideActiveUntil = 0;
   let sprintEnergy = MOBILITY.sprintMax;
   let sprintExhausted = false;
-  let playerBitz = ECONOMY.startingCredits;
-  let storyProgress = loadStoryProgress();
-  let currentStoryChapterId = loadStoryCurrentChapterId();
-  let storyMissionState = null;
-  let developerModeEnabled = false;
-  let developerModeSnapshot = null;
-  let phoneEmulationEnabled = false;
-  let phoneEmulationSnapshot = null;
-  let phoneEmulationLandscape = false;
   const LOOK_SENSITIVITY_STORAGE_KEY = "fighterArena.lookSensitivity.v1";
   const LOOK_SENSITIVITY_MIN = 0.45;
   const LOOK_SENSITIVITY_MAX = 1.9;
@@ -1903,7 +1606,6 @@ function bootstrap() {
       reload: { x: 0.94, y: 0.27, size: 1 },
       heal: { x: 0.84, y: 0.4, size: 1 },
       view: { x: 0.94, y: 0.4, size: 1 },
-      rotate: { x: 0.74, y: 0.53, size: 1 },
       wall: { x: 0.84, y: 0.53, size: 1 },
       pickup: { x: 0.94, y: 0.53, size: 1 },
       shop: { x: 0.84, y: 0.79, size: 1 },
@@ -1926,7 +1628,6 @@ function bootstrap() {
       reload: { x: 0.94, y: 0.27, size: 1 },
       heal: { x: 0.84, y: 0.4, size: 1 },
       view: { x: 0.94, y: 0.4, size: 1 },
-      rotate: { x: 0.74, y: 0.53, size: 1 },
       wall: { x: 0.84, y: 0.53, size: 1 },
       pickup: { x: 0.94, y: 0.53, size: 1 },
       shop: { x: 0.84, y: 0.79, size: 1 },
@@ -1958,7 +1659,6 @@ function bootstrap() {
     reload: { element: touchReloadButton, type: "button", baseWidth: 82, baseHeight: 50, minScale: 0.72, maxScale: 1.7, labelKey: "touch.reload" },
     heal: { element: touchHealButton, type: "button", baseWidth: 82, baseHeight: 50, minScale: 0.72, maxScale: 1.7, labelKey: "touch.heal" },
     view: { element: touchViewButton, type: "button", baseWidth: 82, baseHeight: 50, minScale: 0.72, maxScale: 1.7, labelKey: "touch.view" },
-    rotate: { element: touchRotateButton, type: "button", baseWidth: 82, baseHeight: 50, minScale: 0.72, maxScale: 1.7, labelKey: "touch.rotate" },
     wall: { element: touchWallButton, type: "button", baseWidth: 82, baseHeight: 50, minScale: 0.72, maxScale: 1.7, labelKey: "touch.wall" },
     pickup: { element: touchPickupButton, type: "button", baseWidth: 82, baseHeight: 50, minScale: 0.72, maxScale: 1.7, labelKey: "touch.pickup" },
     shop: { element: touchShopButton, type: "button", baseWidth: 82, baseHeight: 50, minScale: 0.72, maxScale: 1.7, labelKey: "touch.shop" },
@@ -2101,19 +1801,11 @@ function bootstrap() {
     panelSoundValue.textContent = valueText;
   }
 
-  function previewAudioFeedback() {
-    sound.resume();
-    if (!audioSettings.muted && audioSettings.volume > 0) {
-      sound.preview(audioSettings.volume);
-    }
-  }
-
   function setAudioMuted(nextMuted) {
     audioSettings.muted = Boolean(nextMuted);
     saveAudioSettings();
     syncAudioSettings();
     updateSoundUi();
-    previewAudioFeedback();
     saveActiveAccountData({ silent: true });
   }
 
@@ -2129,7 +1821,6 @@ function bootstrap() {
     saveAudioSettings();
     syncAudioSettings();
     updateSoundUi();
-    previewAudioFeedback();
     saveActiveAccountData({ silent: true });
   }
 
@@ -2153,98 +1844,6 @@ function bootstrap() {
     }
   }
 
-  function createDefaultStoryProgress() {
-    return {
-      highestUnlocked: 1,
-      completed: [],
-    };
-  }
-
-  function sanitizeStoryProgress(data) {
-    const base = createDefaultStoryProgress();
-    if (!data || typeof data !== "object") {
-      return base;
-    }
-    base.highestUnlocked = THREE.MathUtils.clamp(
-      Number.isFinite(Number(data.highestUnlocked)) ? Number(data.highestUnlocked) : 1,
-      1,
-      STORY_CHAPTERS.length
-    );
-    if (Array.isArray(data.completed)) {
-      base.completed = data.completed
-        .map(function (value) { return String(value || ""); })
-        .filter(function (value, index, list) {
-          return value && list.indexOf(value) === index;
-        });
-    }
-    return base;
-  }
-
-  function loadStoryProgress() {
-    try {
-      return sanitizeStoryProgress(JSON.parse(localStorage.getItem(STORY_PROGRESS_STORAGE_KEY) || "null"));
-    } catch (_error) {
-      return createDefaultStoryProgress();
-    }
-  }
-
-  function saveStoryProgress() {
-    try {
-      localStorage.setItem(STORY_PROGRESS_STORAGE_KEY, JSON.stringify(storyProgress));
-    } catch (_error) {
-      // Ignore storage failures in locked-down browsers.
-    }
-  }
-
-  function loadStoryCurrentChapterId() {
-    try {
-      const value = String(localStorage.getItem(STORY_CURRENT_CHAPTER_STORAGE_KEY) || "story-1");
-      return STORY_CHAPTERS.some(function (chapter) { return chapter.id === value; }) ? value : "story-1";
-    } catch (_error) {
-      return "story-1";
-    }
-  }
-
-  function saveStoryCurrentChapterId() {
-    try {
-      localStorage.setItem(STORY_CURRENT_CHAPTER_STORAGE_KEY, currentStoryChapterId || "story-1");
-    } catch (_error) {
-      // Ignore storage failures in locked-down browsers.
-    }
-  }
-
-  function getStoryChapterById(chapterId) {
-    const matchId = String(chapterId || "");
-    for (let i = 0; i < STORY_CHAPTERS.length; i += 1) {
-      if (STORY_CHAPTERS[i].id === matchId) {
-        return STORY_CHAPTERS[i];
-      }
-    }
-    return STORY_CHAPTERS[0];
-  }
-
-  function getCurrentStoryChapter() {
-    return getStoryChapterById(currentStoryChapterId);
-  }
-
-  function isStoryChapterUnlocked(chapter) {
-    return chapter.index <= storyProgress.highestUnlocked;
-  }
-
-  function isStoryChapterComplete(chapter) {
-    return storyProgress.completed.indexOf(chapter.id) !== -1;
-  }
-
-  function getLocalizedStoryLabel(chapter) {
-    const target = chapter || getCurrentStoryChapter();
-    return selectedLanguage === LANGUAGES.zh ? target.labels.zh : target.labels.en;
-  }
-
-  function getLocalizedStorySummary(chapter) {
-    const target = chapter || getCurrentStoryChapter();
-    return selectedLanguage === LANGUAGES.zh ? target.summaries.zh : target.summaries.en;
-  }
-
   function isCompactTouchStyle() {
     return selectedTouchStyle === TOUCH_STYLES.compact;
   }
@@ -2264,8 +1863,6 @@ function bootstrap() {
         return t("touch.actionCompact");
       case "wall":
         return t("touch.toolsCompact");
-      case "shop":
-        return t("touch.shopCompact");
       default:
         return t("touch." + key);
     }
@@ -2282,7 +1879,6 @@ function bootstrap() {
     touchReloadButton.textContent = getTouchButtonLabel("reload");
     touchHealButton.textContent = getTouchButtonLabel("heal");
     touchViewButton.textContent = getTouchButtonLabel("view");
-    touchRotateButton.textContent = getTouchButtonLabel("rotate");
     touchPickupButton.textContent = getTouchButtonLabel("pickup");
     touchWallButton.textContent = getTouchButtonLabel("wall");
     touchShopButton.textContent = getTouchButtonLabel("shop");
@@ -2410,9 +2006,6 @@ function bootstrap() {
       totalShots: totalShots,
       zombieKills: zombieKills,
       miniGameScore: miniGameScore,
-      playerBitz: playerBitz,
-      storyProgress: sanitizeStoryProgress(storyProgress),
-      currentStoryChapterId: currentStoryChapterId,
     };
   }
 
@@ -2471,11 +2064,6 @@ function bootstrap() {
     totalShots = Number.isFinite(Number(data.totalShots)) ? Number(data.totalShots) : 0;
     zombieKills = Number.isFinite(Number(data.zombieKills)) ? Number(data.zombieKills) : 0;
     miniGameScore = Number.isFinite(Number(data.miniGameScore)) ? Number(data.miniGameScore) : 0;
-    playerBitz = Number.isFinite(Number(data.playerBitz)) ? Math.max(0, Math.round(Number(data.playerBitz))) : ECONOMY.startingCredits;
-    storyProgress = sanitizeStoryProgress(data.storyProgress);
-    currentStoryChapterId = getStoryChapterById(data.currentStoryChapterId).id;
-    saveStoryProgress();
-    saveStoryCurrentChapterId();
     loadWeaponState();
   }
 
@@ -2515,7 +2103,6 @@ function bootstrap() {
     syncEquippedWeaponModel();
     updateLoadoutBar();
     renderAccountUi();
-    renderShopPanel();
     refreshSessionChrome();
   }
 
@@ -2701,34 +2288,6 @@ function bootstrap() {
     const safeProfile = sanitizeScreenFitProfile(profile || getCurrentScreenFitProfile());
     const viewportWidth = Math.max(window.innerWidth, 1);
     const viewportHeight = Math.max(window.innerHeight, 1);
-
-    if (phoneEmulationEnabled && viewportWidth > 760) {
-      const margin = 18;
-      const availableWidth = Math.max(280, viewportWidth - margin * 2);
-      const availableHeight = Math.max(300, viewportHeight - margin * 2);
-      const targetAspect = phoneEmulationLandscape ? 2.42 : (9 / 19.5);
-      let width = Math.min(availableWidth, phoneEmulationLandscape ? 1040 : 430);
-      let height = Math.round(width / targetAspect);
-      if (height > availableHeight) {
-        height = availableHeight;
-        width = Math.round(height * targetAspect);
-      }
-      const left = Math.round((viewportWidth - width) * 0.5);
-      const top = Math.round((viewportHeight - height) * 0.5);
-      const right = Math.max(0, viewportWidth - left - width);
-      const bottom = Math.max(0, viewportHeight - top - height);
-      return {
-        profile: safeProfile,
-        left: left,
-        right: right,
-        top: top,
-        bottom: bottom,
-        width: width,
-        height: height,
-        radius: 26,
-      };
-    }
-
     const left = Math.round(safeProfile.left * viewportWidth);
     const right = Math.round(safeProfile.right * viewportWidth);
     const top = Math.round(safeProfile.top * viewportHeight);
@@ -2896,37 +2455,7 @@ function bootstrap() {
     updateControlFitSelectionState();
   }
 
-  function isPortraitViewport() {
-    return window.innerHeight >= window.innerWidth;
-  }
-
-  function getMobileViewportShortSide(frame) {
-    return Math.min(frame.width, frame.height);
-  }
-
-  function getControlLayoutBaseWidth(config, frame, key) {
-    if (selectedControlScheme === CONTROL_SCHEMES.pad) {
-      const shortSide = getMobileViewportShortSide(frame);
-      const portrait = isPortraitViewport();
-      if (config.type === "joystick") {
-        return THREE.MathUtils.clamp(shortSide * (isCompactTouchStyle() ? 0.31 : 0.33), 92, 132);
-      }
-      if (config.type === "button") {
-        return THREE.MathUtils.clamp(shortSide * (isCompactTouchStyle() ? 0.2 : 0.22), 68, 92);
-      }
-      if (key === "status") {
-        return Math.min(frame.width * 0.94, portrait ? 420 : 620);
-      }
-      if (key === "sprintMeter") {
-        return Math.min(frame.width * 0.72, portrait ? 280 : 340);
-      }
-      if (key === "coords") {
-        return THREE.MathUtils.clamp(frame.width * 0.38, 130, 190);
-      }
-      if (key === "loadout") {
-        return Math.min(frame.width * 0.96, portrait ? 560 : 760);
-      }
-    }
+  function getControlLayoutBaseWidth(config, frame) {
     const widthFraction = Number(config.widthFraction);
     if (Number.isFinite(widthFraction) && widthFraction > 0) {
       const maxWidth = Number.isFinite(Number(config.maxWidth)) ? Number(config.maxWidth) : frame.width * widthFraction;
@@ -2935,29 +2464,7 @@ function bootstrap() {
     return config.baseWidth;
   }
 
-  function getControlLayoutBaseHeight(config, key, frame) {
-    if (selectedControlScheme === CONTROL_SCHEMES.pad) {
-      const shortSide = getMobileViewportShortSide(frame);
-      const portrait = isPortraitViewport();
-      if (config.type === "joystick") {
-        return getControlLayoutBaseWidth(config, frame, key);
-      }
-      if (config.type === "button") {
-        return THREE.MathUtils.clamp(shortSide * (isCompactTouchStyle() ? 0.13 : 0.14), 46, 60);
-      }
-      if (key === "status") {
-        return portrait ? 84 : 96;
-      }
-      if (key === "sprintMeter") {
-        return portrait ? 56 : 64;
-      }
-      if (key === "coords") {
-        return 38;
-      }
-      if (key === "loadout") {
-        return portrait ? 104 : 118;
-      }
-    }
+  function getControlLayoutBaseHeight(config) {
     return config.baseHeight;
   }
 
@@ -2966,8 +2473,8 @@ function bootstrap() {
     const modeKey = getControlLayoutProfileKey();
     const layout = profile[key] || CONTROL_LAYOUT_DEFAULTS[modeKey][key];
     const size = THREE.MathUtils.clamp(layout.size, config.minScale, config.maxScale);
-    const baseWidth = getControlLayoutBaseWidth(config, frame, key);
-    const baseHeight = getControlLayoutBaseHeight(config, key, frame);
+    const baseWidth = getControlLayoutBaseWidth(config, frame);
+    const baseHeight = getControlLayoutBaseHeight(config, frame);
     const width = baseWidth * size;
     const height = baseHeight * size;
     const centerX = THREE.MathUtils.clamp(layout.x * frame.width, width * 0.5, Math.max(width * 0.5, frame.width - width * 0.5));
@@ -3327,56 +2834,39 @@ function bootstrap() {
   }
 
   function refreshSessionChrome() {
-    const menuVisible = !menuScreen.classList.contains("is-hidden");
     document.body.classList.toggle("is-playing", pointerLocked);
     document.body.classList.toggle("is-screen-fit-editing", screenFitEditorOpen);
     document.body.classList.toggle("is-control-fit-editing", controlFitEditorOpen);
     document.body.classList.toggle("is-social-open", socialPanelOpen);
-    document.body.classList.toggle("is-shop-open", shopPanelOpen);
     document.body.classList.toggle("is-settings-open", settingsPanelOpen);
-    document.body.classList.toggle("is-story-open", storyBrowserOpen);
-    document.body.classList.toggle("is-phone-emulation", phoneEmulationEnabled);
-    document.body.classList.toggle("is-phone-emulation-landscape", phoneEmulationEnabled && phoneEmulationLandscape);
-    document.body.classList.toggle("is-menu-open", menuVisible);
     document.body.classList.toggle(
       "is-mobile-session",
       singlePlayerStarted && selectedControlScheme === CONTROL_SCHEMES.pad
     );
     const panelVisible =
-      !menuVisible &&
       !pointerLocked &&
       singlePlayerStarted &&
       !screenFitEditorOpen &&
       !controlFitEditorOpen &&
       !socialPanelOpen &&
-      !shopPanelOpen &&
-      !settingsPanelOpen &&
-      !storyBrowserOpen;
+      !settingsPanelOpen;
     document.body.classList.toggle("is-panel-open", panelVisible);
     panel.classList.toggle("is-hidden", !panelVisible);
     const padScheme = selectedControlScheme === CONTROL_SCHEMES.pad;
     const padVisible = singlePlayerStarted && padScheme;
     const controlEditorActive = controlFitEditorOpen;
-    const mobileControlsActive = padVisible && !screenFitEditorOpen && !controlFitEditorOpen && !socialPanelOpen && !shopPanelOpen && !settingsPanelOpen && !storyBrowserOpen;
+    const mobileControlsActive = padVisible && !screenFitEditorOpen && !controlFitEditorOpen && !socialPanelOpen && !settingsPanelOpen;
     const showTouchUi = mobileControlsActive || (controlEditorActive && padScheme);
     touchUi.hidden = !showTouchUi;
     touchUi.classList.toggle("is-active", showTouchUi);
     document.body.classList.toggle("is-mobile-controls", showTouchUi);
-    document.body.classList.toggle("is-mobile-portrait", Boolean(showTouchUi && isPortraitViewport()));
     const socialVisible =
       singlePlayerStarted &&
-      !menuVisible &&
       !screenFitEditorOpen &&
       !controlFitEditorOpen &&
       !socialPanelOpen &&
-      !shopPanelOpen &&
-      !settingsPanelOpen &&
-      !storyBrowserOpen;
+      !settingsPanelOpen;
     socialHudButton.classList.toggle("is-hidden", !socialVisible);
-    phoneEmuRotateButton.classList.toggle("is-hidden", !phoneEmulationEnabled);
-    phoneEmuRotateButton.textContent = phoneEmulationLandscape
-      ? t("phoneEmu.rotatePortrait")
-      : t("phoneEmu.rotateLandscape");
   }
 
   function setPlayingState(active) {
@@ -3535,265 +3025,6 @@ function bootstrap() {
     miniGameBrowser.classList.toggle("is-hidden", !miniGameBrowserOpen);
   }
 
-  function formatBitzValue(value) {
-    return Math.max(0, Math.round(Number(value) || 0)).toLocaleString();
-  }
-
-  function syncShopCreditsLabel() {
-    shopCredits.textContent = t("shop.credits", { credits: formatBitzValue(playerBitz) });
-  }
-
-  function renderShopPanel() {
-    syncShopCreditsLabel();
-    shopGrid.replaceChildren();
-
-    LOADOUT.forEach(function (weaponConfig, index) {
-      const card = document.createElement("article");
-      card.className = "shop-card";
-      const isOwned = ownedWeapons[index];
-      const isEquipped = isOwned && index === selectedWeaponIndex;
-      const starter = Boolean(weaponConfig.starter);
-      card.classList.toggle("is-owned", isOwned);
-      card.classList.toggle("is-equipped", isEquipped);
-      card.classList.toggle("is-locked", !isOwned);
-
-      const tag = document.createElement("span");
-      tag.className = "shop-card__tag";
-      tag.textContent = starter
-        ? t("shop.starter")
-        : isEquipped
-          ? t("shop.equipped")
-          : isOwned
-            ? t("shop.owned")
-            : t("shop.priceTag", { price: formatBitzValue(weaponConfig.price) });
-
-      const title = document.createElement("strong");
-      title.textContent = weaponConfig.label;
-
-      const description = document.createElement("p");
-      description.textContent = weaponConfig.description;
-
-      const price = document.createElement("p");
-      price.className = "shop-card__price";
-      price.textContent = isOwned
-        ? t("shop.rangeTag", { range: weaponConfig.effectiveRange })
-        : t("shop.buyPrice", { price: formatBitzValue(weaponConfig.price) });
-
-      const action = document.createElement("button");
-      action.type = "button";
-      action.className = "shop-card__button";
-
-      if (isEquipped) {
-        action.textContent = t("shop.equipped");
-        action.disabled = true;
-      } else if (isOwned) {
-        action.textContent = t("shop.equip");
-        action.addEventListener("click", function () {
-          selectWeapon(index);
-          renderShopPanel();
-        });
-      } else {
-        action.textContent = t("shop.buy");
-        action.disabled = playerBitz < weaponConfig.price;
-        action.addEventListener("click", function () {
-          buyShopWeapon(index);
-        });
-      }
-
-      card.append(tag, title, description, price, action);
-      shopGrid.append(card);
-    });
-  }
-
-  function openShopPanel() {
-    if (shopPanelOpen) {
-      return;
-    }
-    renderShopPanel();
-    shopPanelOpen = true;
-    shopPanel.classList.remove("is-hidden");
-    if (document.pointerLockElement === renderer.domElement && typeof document.exitPointerLock === "function") {
-      document.exitPointerLock();
-    } else {
-      setPlayingState(false);
-    }
-    refreshSessionChrome();
-  }
-
-  function closeShopPanel(options) {
-    const shouldResume = !options || options.resume !== false;
-    if (!shopPanelOpen) {
-      return;
-    }
-    shopPanelOpen = false;
-    shopPanel.classList.add("is-hidden");
-    refreshSessionChrome();
-    if (shouldResume && singlePlayerStarted && selectedControlScheme === CONTROL_SCHEMES.pad) {
-      requestWorldPointerLock();
-    }
-  }
-
-  function toggleShopPanel() {
-    if (shopPanelOpen) {
-      closeShopPanel();
-    } else {
-      openShopPanel();
-    }
-  }
-
-  function awardBitz(amount) {
-    if (!Number.isFinite(Number(amount)) || Number(amount) <= 0) {
-      return;
-    }
-    playerBitz = Math.max(0, Math.round(playerBitz + Number(amount)));
-    renderShopPanel();
-    saveActiveAccountData({ silent: true });
-  }
-
-  function buyShopWeapon(index) {
-    const weaponConfig = LOADOUT[index];
-    if (!weaponConfig || ownedWeapons[index]) {
-      return;
-    }
-    if (playerBitz < weaponConfig.price) {
-      setBootMessage(t("boot.shopNoBitz"));
-      return;
-    }
-    playerBitz -= weaponConfig.price;
-    ownedWeapons[index] = true;
-    weaponStates[index].ammoInMag = LOADOUT[index].magazineSize;
-    weaponStates[index].reserveAmmo = LOADOUT[index].reserveAmmoStart;
-    weaponStates[index].heat = 0;
-    selectWeapon(index);
-    renderShopPanel();
-    updateLoadoutBar();
-    saveActiveAccountData({ silent: true });
-    setBootMessage(t("boot.shopBought", { weapon: weaponConfig.shortLabel }));
-  }
-
-  function activateDeveloperMode() {
-    if (developerModeEnabled) {
-      return;
-    }
-    developerModeSnapshot = {
-      ownedWeapons: ownedWeapons.slice(),
-      weaponStates: weaponStates.map(function (state) {
-        return { ammoInMag: state.ammoInMag, reserveAmmo: state.reserveAmmo, heat: state.heat };
-      }),
-      playerBitz: playerBitz,
-      selectedWeaponIndex: selectedWeaponIndex,
-    };
-    developerModeEnabled = true;
-    playerBitz = 999999;
-    for (let i = 0; i < LOADOUT.length; i += 1) {
-      ownedWeapons[i] = true;
-      weaponStates[i].ammoInMag = Math.max(LOADOUT[i].magazineSize, weaponStates[i].ammoInMag);
-      weaponStates[i].reserveAmmo = Math.max(LOADOUT[i].reserveAmmoStart, LOADOUT[i].magazineSize * 8);
-      weaponStates[i].heat = 0;
-    }
-    playerHealth = PLAYER.maxHealth;
-    healingPotionReadyAt = 0;
-    wallBuildReadyAt = 0;
-    sprintEnergy = MOBILITY.sprintMax;
-    sprintExhausted = false;
-    loadWeaponState();
-    syncEquippedWeaponModel();
-    renderShopPanel();
-    updateLoadoutBar();
-    setBootMessage(t("boot.devModeOn"));
-  }
-
-  function deactivateDeveloperMode() {
-    if (!developerModeEnabled) {
-      return;
-    }
-    const snapshot = developerModeSnapshot;
-    developerModeEnabled = false;
-    developerModeSnapshot = null;
-    if (snapshot) {
-      for (let i = 0; i < LOADOUT.length; i += 1) {
-        ownedWeapons[i] = Boolean(snapshot.ownedWeapons[i]);
-        weaponStates[i].ammoInMag = snapshot.weaponStates[i].ammoInMag;
-        weaponStates[i].reserveAmmo = snapshot.weaponStates[i].reserveAmmo;
-        weaponStates[i].heat = snapshot.weaponStates[i].heat;
-      }
-      playerBitz = snapshot.playerBitz;
-      selectedWeaponIndex = ownedWeapons[snapshot.selectedWeaponIndex]
-        ? snapshot.selectedWeaponIndex
-        : findNextOwnedWeapon(0);
-      loadWeaponState();
-      syncEquippedWeaponModel();
-      updateLoadoutBar();
-      renderShopPanel();
-    }
-    setBootMessage(t("boot.devModeOff"));
-  }
-
-  function togglePhoneEmulation() {
-    if (phoneEmulationEnabled) {
-      phoneEmulationEnabled = false;
-      const snapshot = phoneEmulationSnapshot;
-      phoneEmulationSnapshot = null;
-      phoneEmulationLandscape = false;
-      if (snapshot) {
-        selectedControlScheme = snapshot.controlScheme;
-        selectedTouchStyle = snapshot.touchStyle;
-      }
-      updateMenuSelectionUi();
-      updateInstructionCopy();
-      applyTouchStyleUi();
-      applyScreenFitLayout();
-      applyControlLayout();
-      refreshSessionChrome();
-      updateScreenFitCopy();
-      updateControlFitCopy();
-      setBootMessage(t("boot.phoneEmuOff"));
-      return;
-    }
-
-    phoneEmulationSnapshot = {
-      controlScheme: selectedControlScheme,
-      touchStyle: selectedTouchStyle,
-    };
-    phoneEmulationEnabled = true;
-    phoneEmulationLandscape = false;
-    selectedControlScheme = CONTROL_SCHEMES.pad;
-    selectedTouchStyle = TOUCH_STYLES.compact;
-    updateMenuSelectionUi();
-    updateInstructionCopy();
-    applyTouchStyleUi();
-    applyScreenFitLayout();
-    applyControlLayout();
-    refreshSessionChrome();
-    updateScreenFitCopy();
-    updateControlFitCopy();
-    setBootMessage(t("boot.phoneEmuOn"));
-  }
-
-  function registerDeveloperShortcutInput(event) {
-    if (!event || event.repeat || event.ctrlKey || event.metaKey || event.altKey) {
-      return false;
-    }
-    const activeTag = document.activeElement ? String(document.activeElement.tagName || "") : "";
-    if (activeTag === "INPUT" || activeTag === "TEXTAREA" || document.activeElement && document.activeElement.isContentEditable) {
-      return false;
-    }
-    const code = String(event.code || event.key || "");
-    if (code === "F3") {
-      togglePhoneEmulation();
-      return true;
-    }
-    if (code === "F5") {
-      if (developerModeEnabled) {
-        deactivateDeveloperMode();
-      } else {
-        activateDeveloperMode();
-      }
-      return true;
-    }
-    return false;
-  }
-
   function renderMiniGameBrowser() {
     miniGameGrid.replaceChildren();
     MINI_GAME_ORDER.forEach(function (miniGameId) {
@@ -3850,74 +3081,6 @@ function bootstrap() {
 
   function closeMiniGameBrowser() {
     setMiniGameBrowserOpen(false);
-  }
-
-  function setStoryBrowserOpen(active) {
-    storyBrowserOpen = Boolean(active);
-    storyBrowser.classList.toggle("is-hidden", !storyBrowserOpen);
-  }
-
-  function renderStoryBrowser() {
-    storyChapterGrid.replaceChildren();
-    STORY_CHAPTERS.forEach(function (chapter) {
-      const card = document.createElement("article");
-      card.className = "mini-game-card";
-      const unlocked = isStoryChapterUnlocked(chapter);
-      if (!unlocked) {
-        card.classList.add("mode-card--locked");
-      }
-
-      const tag = document.createElement("span");
-      tag.className = "mini-game-card__tag";
-      tag.textContent = isStoryChapterComplete(chapter)
-        ? t("storyBrowser.complete")
-        : unlocked
-          ? t("storyBrowser.progress", { index: chapter.index, total: STORY_CHAPTERS.length })
-          : t("storyBrowser.locked");
-
-      const title = document.createElement("h3");
-      title.className = "mini-game-card__title";
-      title.textContent = getLocalizedStoryLabel(chapter);
-
-      const description = document.createElement("p");
-      description.className = "mini-game-card__description";
-      description.textContent = getLocalizedStorySummary(chapter);
-
-      const meta = document.createElement("p");
-      meta.className = "mini-game-card__meta";
-      const lineup = chapter.lineup.slice(0, 3).map(function (monsterId) {
-        return t("monster." + monsterId);
-      }).join(" • ");
-      meta.textContent = t("storyBrowser.objective", { kills: chapter.goalKills }) + " • " + lineup;
-
-      const playButton = document.createElement("button");
-      playButton.type = "button";
-      playButton.className = unlocked ? "start-button" : "menu-toggle";
-      playButton.textContent = unlocked ? t("storyBrowser.play") : t("storyBrowser.locked");
-      playButton.disabled = !unlocked;
-      playButton.addEventListener("click", function () {
-        if (!unlocked) {
-          setBootMessage(t("boot.storyLocked"));
-          return;
-        }
-        currentStoryChapterId = chapter.id;
-        saveStoryCurrentChapterId();
-        closeStoryBrowser();
-        startMode(MODES.story);
-      });
-
-      card.append(tag, title, description, meta, playButton);
-      storyChapterGrid.append(card);
-    });
-  }
-
-  function openStoryBrowser() {
-    renderStoryBrowser();
-    setStoryBrowserOpen(true);
-  }
-
-  function closeStoryBrowser() {
-    setStoryBrowserOpen(false);
   }
 
   function formatSocialRosterLine(entry) {
@@ -4050,7 +3213,6 @@ function bootstrap() {
 
     socialChatInput.disabled = !multiplayerRoomActive;
     socialSendButton.disabled = !multiplayerRoomActive;
-    syncShopCreditsLabel();
     socialChatInput.placeholder = multiplayerRoomActive
       ? t("social.input")
       : t("boot.chatUnavailable");
@@ -4079,13 +3241,7 @@ function bootstrap() {
       setPlayingState(false);
     }
     refreshSessionChrome();
-    window.setTimeout(function () {
-      if (selectedControlScheme === CONTROL_SCHEMES.pad) {
-        socialChatInput.focus({ preventScroll: true });
-      } else {
-        socialChatInput.focus();
-      }
-    }, 60);
+    socialChatInput.focus();
   }
 
   function toggleSocialPanel() {
@@ -4233,7 +3389,7 @@ function bootstrap() {
       console.warn("Room list refresh failed", error);
       roomBrowserRooms = [];
       renderRoomBrowserRooms();
-      setBootMessage(getMultiplayerUnavailableMessage());
+      setBootMessage(t("boot.unavailable"));
     } finally {
       roomRefreshButton.disabled = false;
     }
@@ -4280,7 +3436,7 @@ function bootstrap() {
     const roomInfo = payload && payload.room ? payload.room : null;
     const playerInfo = payload && payload.player ? payload.player : payload;
     if (!playerInfo || !playerInfo.id) {
-      setBootMessage(getMultiplayerUnavailableMessage());
+      setBootMessage(t("boot.unavailable"));
       return false;
     }
 
@@ -4346,7 +3502,7 @@ function bootstrap() {
       await finalizeRoomJoin(payload, { promptForCode: Boolean(payload.room && payload.room.private) });
     } catch (error) {
       console.error("Room create failed", error);
-      setBootMessage(getMultiplayerUnavailableMessage());
+      setBootMessage(t("boot.unavailable"));
     } finally {
       roomCreateButton.disabled = false;
     }
@@ -4376,7 +3532,7 @@ function bootstrap() {
       await finalizeRoomJoin(payload);
     } catch (error) {
       console.error("Room join failed", error);
-      setBootMessage(getMultiplayerUnavailableMessage());
+      setBootMessage(t("boot.unavailable"));
     }
   }
 
@@ -4405,7 +3561,7 @@ function bootstrap() {
       await finalizeRoomJoin(payload);
     } catch (error) {
       console.error("Private room join failed", error);
-      setBootMessage(getMultiplayerUnavailableMessage());
+      setBootMessage(t("boot.unavailable"));
     }
   }
 
@@ -4445,10 +3601,6 @@ function bootstrap() {
     miniGameBrowserTitle.textContent = t("miniGameBrowser.title");
     miniGameBrowserSummary.textContent = t("miniGameBrowser.summary");
     miniGameBrowserCloseButton.textContent = t("miniGameBrowser.close");
-    storyBrowserEyebrow.textContent = t("storyBrowser.eyebrow");
-    storyBrowserTitle.textContent = t("storyBrowser.title");
-    storyBrowserSummary.textContent = t("storyBrowser.summary");
-    storyBrowserCloseButton.textContent = t("roomBrowser.close");
     roomPlayerNameLabel.textContent = t("roomBrowser.playerName");
     roomPlayerNameInput.placeholder = t("common.player");
     roomCreateLabel.textContent = t("roomBrowser.create");
@@ -4480,9 +3632,6 @@ function bootstrap() {
     zombieModeTag.textContent = t("modes.zombie.tag");
     zombieModeTitle.textContent = t("modes.zombie.title");
     zombieModeDescription.textContent = t("modes.zombie.description");
-    storyModeTag.textContent = t("modes.story.tag");
-    storyModeTitle.textContent = t("modes.story.title");
-    storyModeDescription.textContent = t("modes.story.description");
     multiplayerPvpTag.textContent = t("modes.pvp.tag");
     multiplayerPvpTitle.textContent = t("modes.pvp.title");
     multiplayerPvpDescription.textContent = t("modes.pvp.description");
@@ -4496,8 +3645,7 @@ function bootstrap() {
     shopEyebrow.textContent = t("shop.eyebrow");
     shopTitle.textContent = t("shop.title");
     shopSummary.textContent = t("shop.summary");
-    shopCloseButton.textContent = t("roomBrowser.close");
-    syncShopCreditsLabel();
+    shopCredits.textContent = t("shop.credits", { credits: 0 });
     socialEyebrow.textContent = t("social.eyebrow");
     socialTitle.textContent = t("social.title");
     socialCloseButton.textContent = t("social.close");
@@ -4518,7 +3666,6 @@ function bootstrap() {
     renderMiniGameBrowser();
     renderRoomBrowserRooms();
     renderSocialPanel();
-    renderShopPanel();
   }
 
   function setLanguage(language) {
@@ -4545,45 +3692,6 @@ function bootstrap() {
       return;
     }
     refreshSessionChrome();
-  }
-
-  async function ensureRotationFullscreen() {
-    const root = document.documentElement;
-    if (document.fullscreenElement || !root || !root.requestFullscreen) {
-      return true;
-    }
-    try {
-      await root.requestFullscreen();
-      return true;
-    } catch (_error) {
-      return false;
-    }
-  }
-
-  async function toggleMobileOrientation() {
-    const orientationApi = screen.orientation;
-    if (!orientationApi || typeof orientationApi.lock !== "function") {
-      setBootMessage(t("boot.rotateUnsupported"));
-      return false;
-    }
-
-    const type = String(orientationApi.type || "");
-    const wantsLandscape = !type.startsWith("landscape");
-    const target = wantsLandscape ? "landscape-primary" : "portrait-primary";
-    const fullscreenReady = await ensureRotationFullscreen();
-
-    try {
-      await orientationApi.lock(target);
-      setBootMessage(t(wantsLandscape ? "boot.rotateLandscape" : "boot.rotatePortrait"));
-      return true;
-    } catch (_error) {
-      if (!fullscreenReady) {
-        setBootMessage(t("boot.rotateUnsupported"));
-        return false;
-      }
-      setBootMessage(t("boot.rotateUnsupported"));
-      return false;
-    }
   }
 
   function resetTouchJoystick() {
@@ -4853,9 +3961,6 @@ function bootstrap() {
       }
       toggleCameraMode();
     });
-    bindTouchTap(touchRotateButton, function () {
-      toggleMobileOrientation();
-    });
     bindTouchDualAction(touchPickupButton, {
       onTap: function () {
         pickUpNearbyWeapon();
@@ -4870,16 +3975,17 @@ function bootstrap() {
       onTap: function () {
         attemptBuildDefenseWall();
       },
-    });
-    bindTouchDualAction(touchShopButton, {
-      onTap: function () {
-        toggleShopPanel();
-      },
       onHoldStart: function () {
         if (isCompactTouchStyle()) {
           toggleSocialPanel();
         }
       },
+    });
+    bindTouchTap(touchShopButton, function () {
+      if (isCompactTouchStyle()) {
+        return;
+      }
+      setBootMessage(t("shop.summary"));
     });
     bindTouchTap(touchChatButton, function () {
       if (isCompactTouchStyle()) {
@@ -4910,231 +4016,6 @@ function bootstrap() {
         endControlFitDrag(event);
       });
     });
-  }
-
-  function applySceneTheme(theme) {
-    const resolved = theme || defaultSceneTheme;
-    scene.background = new THREE.Color(resolved.sky);
-    scene.fog.color.setHex(resolved.fog);
-    hemiLight.color.setHex(resolved.light);
-    sun.color.setHex(resolved.sun);
-  }
-
-  function clearStoryMap() {
-    while (storyStructureIds.length) {
-      removeSolidObstacle(storyStructureIds.pop());
-    }
-    while (storyFloorMeshes.length) {
-      const mesh = storyFloorMeshes.pop();
-      solidRoot.remove(mesh);
-      if (mesh.geometry) {
-        mesh.geometry.dispose();
-      }
-      if (mesh.material) {
-        mesh.material.dispose();
-      }
-    }
-    storyMissionState = null;
-  }
-
-  function addStoryFloor(id, x, z, width, depth, color) {
-    const floor = new THREE.Mesh(
-      new THREE.BoxGeometry(width, 0.42, depth),
-      new THREE.MeshStandardMaterial({ color: color || 0x7a8b60, roughness: 0.94, metalness: 0.02 })
-    );
-    floor.position.set(x, sampleHeight(x, z) + 0.21, z);
-    floor.receiveShadow = true;
-    solidRoot.add(floor);
-    storyFloorMeshes.push(floor);
-    return floor;
-  }
-
-  function addStoryObstacle(spec) {
-    storyStructureIds.push(spec.id);
-    return upsertSolidObstacle(spec);
-  }
-
-  function addStoryHouse(baseId, x, z, width, depth, colorA, colorB) {
-    const groundY = sampleHeight(x, z);
-    const halfW = width * 0.5;
-    const halfD = depth * 0.5;
-    const wallHeight = DEFENSE.houseWallHeight + 1.1;
-    const wallY = groundY + wallHeight * 0.5;
-    const t = DEFENSE.houseWallThickness;
-    addStoryFloor(baseId + '-floor', x, z, width - 2, depth - 2, 0xc7b489);
-    addStoryObstacle({ id: baseId + '-north', kind: 'story-house', x: x, y: wallY, z: z - halfD + t * 0.5, width: width, height: wallHeight, depth: t, color: colorA || 0x8a6844 });
-    addStoryObstacle({ id: baseId + '-south', kind: 'story-house', x: x, y: wallY, z: z + halfD - t * 0.5, width: width, height: wallHeight, depth: t, color: colorA || 0x8a6844 });
-    addStoryObstacle({ id: baseId + '-west', kind: 'story-house', x: x - halfW + t * 0.5, y: wallY, z: z, width: t, height: wallHeight, depth: depth - t * 2, color: colorB || 0x79583b });
-    addStoryObstacle({ id: baseId + '-east', kind: 'story-house', x: x + halfW - t * 0.5, y: wallY, z: z, width: t, height: wallHeight, depth: depth - t * 2, color: colorB || 0x79583b });
-  }
-
-  function addStoryBarrier(baseId, x, z, width, depth, height, color) {
-    addStoryObstacle({
-      id: baseId,
-      kind: 'story-barrier',
-      x: x,
-      y: sampleHeight(x, z) + height * 0.5,
-      z: z,
-      width: width,
-      height: height,
-      depth: depth,
-      color: color || 0x5a6674,
-    });
-  }
-
-  function buildStoryMap(mapId) {
-    clearStoryMap();
-    if (mapId === 'deadfront') {
-      addStoryHouse('story-a1', -44, 34, 18, 18);
-      addStoryHouse('story-a2', 42, 28, 18, 18);
-      addStoryBarrier('story-a3', 0, 36, 70, 4, 8, 0x6b5c49);
-      addStoryBarrier('story-a4', -14, -18, 38, 4, 7.5, 0x5b6675);
-      addStoryBarrier('story-a5', 28, -22, 34, 4, 7.5, 0x5b6675);
-    } else if (mapId === 'courtyard') {
-      addStoryHouse('story-b1', -26, 14, 18, 18, 0x84684d, 0x6a533a);
-      addStoryHouse('story-b2', 28, 12, 18, 18, 0x84684d, 0x6a533a);
-      addStoryHouse('story-b3', 0, -28, 22, 20, 0x78603f, 0x5f4932);
-      addStoryBarrier('story-b4', -2, 0, 20, 4, 7, 0x657363);
-      addStoryBarrier('story-b5', -42, -4, 4, 34, 7, 0x657363);
-      addStoryBarrier('story-b6', 42, -4, 4, 34, 7, 0x657363);
-    } else if (mapId === 'canyonline') {
-      addStoryBarrier('story-c1', -30, 0, 16, 88, 12, 0x8b6942);
-      addStoryBarrier('story-c2', 30, 0, 16, 88, 12, 0x8b6942);
-      addStoryBarrier('story-c3', 0, 24, 18, 4, 9, 0x5d5144);
-      addStoryBarrier('story-c4', 0, -22, 18, 4, 9, 0x5d5144);
-      addStoryHouse('story-c5', 0, 58, 16, 14, 0x7c6446, 0x634b36);
-    } else if (mapId === 'refinery') {
-      addStoryBarrier('story-d1', -34, 0, 12, 72, 9, 0x606b78);
-      addStoryBarrier('story-d2', 34, 0, 12, 72, 9, 0x606b78);
-      addStoryBarrier('story-d3', 0, -24, 56, 4, 9, 0x697583);
-      addStoryBarrier('story-d4', -6, 22, 26, 4, 9, 0x697583);
-      addStoryHouse('story-d5', 16, 38, 14, 14, 0x6f6457, 0x53493d);
-      addStoryHouse('story-d6', -18, 40, 14, 14, 0x6f6457, 0x53493d);
-    } else if (mapId === 'farmhold') {
-      addStoryHouse('story-e1', -26, 24, 22, 18, 0x8a6844, 0x765336);
-      addStoryHouse('story-e2', 24, 26, 18, 18, 0x8a6844, 0x765336);
-      addStoryBarrier('story-e3', 0, -16, 72, 4, 7, 0x7b6a58);
-      addStoryBarrier('story-e4', -42, -4, 4, 30, 7, 0x7b6a58);
-      addStoryBarrier('story-e5', 42, -4, 4, 30, 7, 0x7b6a58);
-      addStoryBarrier('story-e6', 0, 42, 44, 4, 7, 0x7b6a58);
-    } else if (mapId === 'lastfort') {
-      addStoryBarrier('story-f1', 0, 42, 92, 4, 10, 0x596574);
-      addStoryBarrier('story-f2', -42, 0, 4, 88, 10, 0x596574);
-      addStoryBarrier('story-f3', 42, 0, 4, 88, 10, 0x596574);
-      addStoryBarrier('story-f4', 0, -26, 58, 4, 10, 0x596574);
-      addStoryHouse('story-f5', -18, 10, 16, 16, 0x7a6652, 0x5a4737);
-      addStoryHouse('story-f6', 18, 10, 16, 16, 0x7a6652, 0x5a4737);
-      addStoryBarrier('story-f7', 0, 4, 24, 4, 10, 0x7a847f);
-    }
-  }
-
-  function getZombieArchetype(monsterId) {
-    return STORY_MONSTERS[String(monsterId || 'shambler')] || STORY_MONSTERS.shambler;
-  }
-
-  function isStoryBossMonster(monsterId) {
-    return String(monsterId || '') === 'brute';
-  }
-
-  function getStoryThreatCounts() {
-    if (!storyMissionState) {
-      return { remaining: 0, bosses: 0, regular: 0 };
-    }
-    const chapter = getCurrentStoryChapter();
-    if (!chapter) {
-      return { remaining: 0, bosses: 0, regular: 0 };
-    }
-
-    let bosses = 0;
-    let regular = 0;
-    for (let i = storyMissionState.spawned; i < chapter.lineup.length; i += 1) {
-      if (isStoryBossMonster(chapter.lineup[i])) {
-        bosses += 1;
-      } else {
-        regular += 1;
-      }
-    }
-
-    for (let i = 0; i < activeZombies.length; i += 1) {
-      const zombie = activeZombies[i];
-      if (zombie && !zombie.isRemoteSync) {
-        if (isStoryBossMonster(zombie.monsterType)) {
-          bosses += 1;
-        } else {
-          regular += 1;
-        }
-      }
-    }
-
-    return {
-      remaining: bosses + regular,
-      bosses: bosses,
-      regular: regular,
-    };
-  }
-
-  function getMultiplayerUnavailableMessage() {
-    const origin = window.location && window.location.origin ? window.location.origin : '';
-    return origin
-      ? t('boot.unavailable') + ' ' + t('boot.shareAddress', { origin: origin })
-      : t('boot.unavailable');
-  }
-
-  function beginStoryChapter() {
-    const chapter = getCurrentStoryChapter();
-    applySceneTheme(chapter.scene || defaultSceneTheme);
-    buildStoryMap(chapter.map);
-    player.position.set(chapter.spawn.x, sampleHeight(chapter.spawn.x, chapter.spawn.z) + PLAYER.height, chapter.spawn.z);
-    player.velocity.set(0, 0, 0);
-    clearZombies();
-    zombieSpawnTimer = 0.35;
-    storyMissionState = {
-      chapterId: chapter.id,
-      spawned: 0,
-      kills: 0,
-      clearAnnounced: false,
-    };
-    setBootMessage(t('boot.storyStart', { title: getLocalizedStoryLabel(chapter) }));
-  }
-
-  function completeStoryChapter() {
-    if (!storyMissionState || storyMissionState.clearAnnounced) {
-      return;
-    }
-    storyMissionState.clearAnnounced = true;
-    const chapter = getCurrentStoryChapter();
-    if (storyProgress.completed.indexOf(chapter.id) === -1) {
-      storyProgress.completed.push(chapter.id);
-    }
-    storyProgress.highestUnlocked = Math.min(STORY_CHAPTERS.length, Math.max(storyProgress.highestUnlocked, chapter.index + 1));
-    saveStoryProgress();
-    saveStoryCurrentChapterId();
-    saveActiveAccountData({ silent: true });
-
-    const nextChapter = STORY_CHAPTERS[chapter.index] || null;
-    if (nextChapter) {
-      currentStoryChapterId = nextChapter.id;
-      saveStoryCurrentChapterId();
-      setBootMessage(t('boot.storyClear'));
-    } else {
-      setBootMessage(t('boot.storyCampaignClear'));
-    }
-  }
-
-  function spawnStoryMonster() {
-    if (!storyMissionState) {
-      return false;
-    }
-    const chapter = getCurrentStoryChapter();
-    if (storyMissionState.spawned >= chapter.lineup.length) {
-      return false;
-    }
-    const monsterId = chapter.lineup[storyMissionState.spawned] || 'shambler';
-    const spawned = spawnZombieAroundPlayer({ archetypeId: monsterId, anchor: chapter.spawn, radiusMin: 26, radiusMax: 86 });
-    if (spawned) {
-      storyMissionState.spawned += 1;
-    }
-    return spawned;
   }
 
   function createSolidObstacle(spec) {
@@ -5631,7 +4512,6 @@ function bootstrap() {
   zombieModeButton.addEventListener("click", function () {
     startMode(MODES.zombie);
   });
-  storyModeButton.addEventListener("click", openStoryBrowser);
   multiplayerPvpButton.addEventListener("click", function () {
     startMultiplayerVariant(MULTIPLAYER_VARIANTS.pvp);
   });
@@ -5643,12 +4523,6 @@ function bootstrap() {
   miniGameBrowser.addEventListener("click", function (event) {
     if (event.target === miniGameBrowser) {
       closeMiniGameBrowser();
-    }
-  });
-  storyBrowserCloseButton.addEventListener("click", closeStoryBrowser);
-  storyBrowser.addEventListener("click", function (event) {
-    if (event.target === storyBrowser) {
-      closeStoryBrowser();
     }
   });
   roomBrowserCloseButton.addEventListener("click", closeRoomBrowser);
@@ -5722,14 +4596,6 @@ function bootstrap() {
   screenFitPauseButton.addEventListener("click", openScreenFitEditor);
   controlFitOpenButton.addEventListener("click", openControlFitEditor);
   controlFitPauseButton.addEventListener("click", openControlFitEditor);
-  phoneEmuRotateButton.addEventListener("click", function (event) {
-    event.preventDefault();
-    phoneEmulationLandscape = !phoneEmulationLandscape;
-    applyScreenFitLayout();
-    applyControlLayout();
-    refreshSessionChrome();
-  });
-
   socialHudButton.addEventListener("click", function (event) {
     if (screenFitEditorOpen || controlFitEditorOpen) {
       event.preventDefault();
@@ -5739,9 +4605,6 @@ function bootstrap() {
   });
   socialCloseButton.addEventListener("click", function () {
     closeSocialPanel();
-  });
-  shopCloseButton.addEventListener("click", function () {
-    closeShopPanel();
   });
   socialSendButton.addEventListener("click", function () {
     sendSocialChatMessage();
@@ -5911,14 +4774,6 @@ function bootstrap() {
       return;
     }
 
-    if (storyBrowserOpen) {
-      if (event.code === "Escape") {
-        closeStoryBrowser();
-        event.preventDefault();
-      }
-      return;
-    }
-
     if (screenFitEditorOpen) {
       if (event.code === "Escape" || event.code === "KeyU") {
         closeScreenFitEditor();
@@ -5976,26 +4831,7 @@ function bootstrap() {
       return;
     }
 
-    if (shopPanelOpen) {
-      if (event.code === "Escape" || event.code === "KeyB") {
-        closeShopPanel();
-        event.preventDefault();
-      }
-      return;
-    }
-
     sound.resume();
-
-    if (developerModeEnabled && event.code === "KeyQ") {
-      deactivateDeveloperMode();
-      event.preventDefault();
-      return;
-    }
-
-    if (registerDeveloperShortcutInput(event)) {
-      event.preventDefault();
-      return;
-    }
 
     switch (event.code) {
       case "KeyW": {
@@ -6056,10 +4892,6 @@ function bootstrap() {
         attemptBuildDefenseWall();
         event.preventDefault();
         break;
-      case "KeyB":
-        toggleShopPanel();
-        event.preventDefault();
-        break;
       case "KeyU":
         openScreenFitEditor();
         event.preventDefault();
@@ -6118,7 +4950,6 @@ function bootstrap() {
 
   window.addEventListener("resize", function () {
     applyScreenFitLayout();
-    refreshSessionChrome();
     updateScreenFitCopy();
     updateControlFitCopy();
   });
@@ -6146,7 +4977,7 @@ function bootstrap() {
 
   function resetWeaponStates() {
     for (let i = 0; i < LOADOUT.length; i += 1) {
-      ownedWeapons[i] = Boolean(LOADOUT[i].starter);
+      ownedWeapons[i] = true;
       weaponStates[i].ammoInMag = LOADOUT[i].magazineSize;
       weaponStates[i].reserveAmmo = LOADOUT[i].reserveAmmoStart;
       weaponStates[i].heat = 0;
@@ -6244,7 +5075,6 @@ function bootstrap() {
       const state = weaponStates[i];
       const hasWeapon = ownedWeapons[i];
 
-      entry.button.hidden = !hasWeapon;
       entry.button.classList.toggle("is-active", hasWeapon && i === selectedWeaponIndex);
       entry.button.classList.toggle(
         "is-empty",
@@ -6254,11 +5084,11 @@ function bootstrap() {
             state.reserveAmmo === 0)
       );
       entry.button.disabled = !hasWeapon;
-      entry.meta.textContent = hasWeapon
-        ? weaponConfig.isMelee
+      entry.meta.textContent = !hasWeapon
+        ? t("loadout.dropped")
+        : weaponConfig.isMelee
           ? t("loadout.melee")
-          : state.ammoInMag + " / " + state.reserveAmmo
-        : "";
+          : state.ammoInMag + " / " + state.reserveAmmo;
     }
   }
 
@@ -6698,7 +5528,6 @@ function bootstrap() {
 
     currentMode = mode;
     sound.resume();
-    rebuildActiveChunkBlocks();
 
     if (!singlePlayerStarted) {
       singlePlayerStarted = true;
@@ -6708,19 +5537,12 @@ function bootstrap() {
 
     const resetZombies =
       mode === MODES.zombie ||
-      mode === MODES.story ||
       (mode === MODES.multiplayer && multiplayerVariant === MULTIPLAYER_VARIANTS.horde) ||
       ((mode === MODES.minigames || (mode === MODES.multiplayer && multiplayerVariant === MULTIPLAYER_VARIANTS.arcade)) && activeMiniGameUsesZombies());
 
     configureModeUi();
     resetRunState(resetZombies);
     beginMiniGameRound();
-    if (mode === MODES.story) {
-      beginStoryChapter();
-    } else {
-      clearStoryMap();
-      applySceneTheme(defaultSceneTheme);
-    }
     if (multiplayerMode) {
       multiplayerSyncTimer = 0;
       multiplayerPollTimer = 0;
@@ -6733,35 +5555,26 @@ function bootstrap() {
     const hordeMode = multiplayerMode && multiplayerVariant === MULTIPLAYER_VARIANTS.horde;
     const arcadeMode = multiplayerMode && multiplayerVariant === MULTIPLAYER_VARIANTS.arcade;
     const miniGameMode = currentMode === MODES.minigames;
-    const storyMode = currentMode === MODES.story;
-    const zombieMode = currentMode === MODES.zombie || storyMode || hordeMode || (miniGameMode && activeMiniGameUsesZombies()) || (arcadeMode && activeMiniGameUsesZombies());
+    const zombieMode = currentMode === MODES.zombie || hordeMode || (miniGameMode && activeMiniGameUsesZombies()) || (arcadeMode && activeMiniGameUsesZombies());
     const pvpMode = multiplayerMode && !hordeMode && !arcadeMode;
-    const storyChapter = storyMode ? getCurrentStoryChapter() : null;
     brandEyebrow.textContent = pvpMode
       ? t("brand.pvp.eyebrow")
       : hordeMode
         ? t("brand.horde.eyebrow")
         : arcadeMode || miniGameMode
           ? t("modes.arcade.title")
-          : storyMode
-            ? t("brand.story.eyebrow")
-            : zombieMode
-              ? t("brand.zombie.eyebrow")
-              : t("brand.single.eyebrow");
+          : zombieMode
+            ? t("brand.zombie.eyebrow")
+            : t("brand.single.eyebrow");
     brandSummary.textContent = pvpMode
       ? t("brand.pvp.summary")
       : hordeMode
         ? t("brand.horde.summary")
         : arcadeMode || miniGameMode
           ? getLocalizedMiniGameDescription(getActiveMiniGameId() || DEFAULT_MINI_GAME_ID)
-          : storyMode
-            ? getLocalizedStorySummary(storyChapter)
-            : zombieMode
-              ? t("brand.zombie.summary")
-              : t("brand.single.summary");
-    if (buildTag) {
-      buildTag.textContent = GAME_BUILD_LABEL;
-    }
+          : zombieMode
+            ? t("brand.zombie.summary")
+            : t("brand.single.summary");
     document.body.classList.toggle("is-zombie-mode", zombieMode);
   }
 
@@ -7576,7 +6389,7 @@ function bootstrap() {
       return finalizeRoomJoin(payload);
     } catch (error) {
       console.error("Failed to join multiplayer session", error);
-      setBootMessage(getMultiplayerUnavailableMessage());
+      setBootMessage(t("boot.unavailable"));
       return false;
     }
   }
@@ -9327,7 +8140,6 @@ function bootstrap() {
     spawnBlockDebris(mesh);
     releaseStackAbove(mesh);
     removeBlockMesh(mesh);
-    awardBitz(ECONOMY.blockReward);
 
     const chunk = activeChunks.get(mesh.userData.chunkKey);
     if (!chunk) {
@@ -9378,30 +8190,19 @@ function bootstrap() {
       return;
     }
 
-    const soloZombieMode = currentMode === MODES.zombie || currentMode === MODES.story || (currentMode === MODES.minigames && activeMiniGameUsesZombies());
+    const soloZombieMode = currentMode === MODES.zombie || (currentMode === MODES.minigames && activeMiniGameUsesZombies());
     if (!soloZombieMode) {
       return;
     }
 
     if (!playerIsDead) {
       zombieSpawnTimer = Math.max(0, zombieSpawnTimer - delta);
-      if (currentMode === MODES.story && storyMissionState) {
-        const chapter = getCurrentStoryChapter();
-        while (zombieSpawnTimer === 0 && activeZombies.length < chapter.maxAlive) {
-          if (!spawnStoryMonster()) {
-            zombieSpawnTimer = 1.2;
-            break;
-          }
-          zombieSpawnTimer += chapter.spawnInterval;
+      while (zombieSpawnTimer === 0 && activeZombies.length < ZOMBIES.maxAlive) {
+        if (!spawnZombieAroundPlayer()) {
+          zombieSpawnTimer = 1.2;
+          break;
         }
-      } else {
-        while (zombieSpawnTimer === 0 && activeZombies.length < ZOMBIES.maxAlive) {
-          if (!spawnZombieAroundPlayer()) {
-            zombieSpawnTimer = 1.2;
-            break;
-          }
-          zombieSpawnTimer += ZOMBIES.spawnInterval;
-        }
+        zombieSpawnTimer += ZOMBIES.spawnInterval;
       }
     }
 
@@ -9419,8 +8220,7 @@ function bootstrap() {
       );
       const distance = zombieToPlayer.length();
 
-      const zombieConfig = zombie.archetype || STORY_MONSTERS.shambler;
-      if (distance > zombieConfig.despawnRange) {
+      if (distance > ZOMBIES.despawnRange) {
         removeZombie(zombie);
         continue;
       }
@@ -9428,18 +8228,18 @@ function bootstrap() {
       let targetSpeed = 0;
       zombie.moving = false;
 
-      if (!playerIsDead && distance < zombieConfig.chaseRange) {
+      if (!playerIsDead && distance < ZOMBIES.chaseRange) {
         zombieToPlayer.normalize();
         zombie.group.rotation.y = Math.atan2(-zombieToPlayer.x, -zombieToPlayer.z);
 
-        if (distance > zombieConfig.attackRange) {
-          targetSpeed = zombieConfig.walkSpeed;
+        if (distance > ZOMBIES.attackRange) {
+          targetSpeed = ZOMBIES.walkSpeed;
           const steering = chooseSteeringStep(
             zombie.group.position.x,
             zombie.group.position.z,
             player.position.x,
             player.position.z,
-            Math.min(distance - zombieConfig.attackRange, targetSpeed * delta),
+            Math.min(distance - ZOMBIES.attackRange, targetSpeed * delta),
             DEFENSE.zombieRadius,
             zombie.group.position.y,
             zombie.group.position.y + 5.2
@@ -9464,8 +8264,8 @@ function bootstrap() {
             zombie.velocity.z = THREE.MathUtils.damp(zombie.velocity.z, 0, 8, delta);
           }
         } else if (zombie.attackCooldown === 0) {
-          damagePlayer(zombieConfig.attackDamage);
-          zombie.attackCooldown = zombieConfig.attackInterval;
+          damagePlayer(ZOMBIES.attackDamage);
+          zombie.attackCooldown = ZOMBIES.attackInterval;
           zombie.attackPulse = 1;
           zombie.velocity.x = THREE.MathUtils.damp(zombie.velocity.x, 0, 8, delta);
           zombie.velocity.z = THREE.MathUtils.damp(zombie.velocity.z, 0, 8, delta);
@@ -9493,9 +8293,8 @@ function bootstrap() {
   }
 
   function animateZombie(zombie, delta) {
-    const zombieConfig = zombie.archetype || STORY_MONSTERS.shambler;
     const strideStrength = Math.min(
-      Math.hypot(zombie.velocity.x, zombie.velocity.z) / zombieConfig.walkSpeed,
+      Math.hypot(zombie.velocity.x, zombie.velocity.z) / ZOMBIES.walkSpeed,
       1
     );
     const attackKick = Math.sin(zombie.attackPulse * Math.PI);
@@ -9521,22 +8320,18 @@ function bootstrap() {
     );
   }
 
-  function spawnZombieAroundPlayer(options) {
-    const settings = options || {};
-    const anchor = settings.anchor || player.position;
-    const radiusMin = Number.isFinite(Number(settings.radiusMin)) ? Number(settings.radiusMin) : ZOMBIES.spawnRadiusMin;
-    const radiusMax = Number.isFinite(Number(settings.radiusMax)) ? Number(settings.radiusMax) : ZOMBIES.spawnRadiusMax;
+  function spawnZombieAroundPlayer() {
     for (let attempt = 0; attempt < 14; attempt += 1) {
       const angle = Math.random() * Math.PI * 2;
       const radius = THREE.MathUtils.lerp(
-        radiusMin,
-        radiusMax,
+        ZOMBIES.spawnRadiusMin,
+        ZOMBIES.spawnRadiusMax,
         Math.random()
       );
       zombieSpawnPosition.set(
-        anchor.x + Math.cos(angle) * radius,
+        player.position.x + Math.cos(angle) * radius,
         0,
-        anchor.z + Math.sin(angle) * radius
+        player.position.z + Math.sin(angle) * radius
       );
       zombieSpawnPosition.y = sampleHeight(
         zombieSpawnPosition.x,
@@ -9574,7 +8369,7 @@ function bootstrap() {
         continue;
       }
 
-      const zombie = createZombie(++zombieId, settings.archetypeId);
+      const zombie = createZombie(++zombieId);
       zombie.group.position.copy(zombieSpawnPosition);
       zombieRoot.add(zombie.group);
       activeZombies.push(zombie);
@@ -9622,7 +8417,7 @@ function bootstrap() {
 
     let zombie = findMultiplayerZombieById(zombieId);
     if (!zombie) {
-      zombie = createZombie(zombieId, zombieInfo.monsterType);
+      zombie = createZombie(zombieId);
       zombie.serverZombieId = zombieId;
       zombie.isRemoteSync = true;
       zombie.targetPosition = new THREE.Vector3(targetX, targetY, targetZ);
@@ -9653,8 +8448,8 @@ function bootstrap() {
       getZombieLabel(zombie.serverZombieId),
       zombie.health,
       zombie.maxHealth,
-      zombie.badgeFill || "#89ff72",
-      zombie.badgeEdge || "#d64040"
+      "#89ff72",
+      "#d64040"
     );
   }
 
@@ -9714,11 +8509,11 @@ function bootstrap() {
     totalHits += 1;
     updateHealthBadge(
       zombie.badge,
-      zombie.badgeLabel || getZombieLabel(zombie.id),
+      getZombieLabel(zombie.id),
       zombie.health,
-      zombie.maxHealth,
-      zombie.badgeFill || "#89ff72",
-      zombie.badgeEdge || "#d64040"
+      ZOMBIES.maxHealth,
+      "#89ff72",
+      "#d64040"
     );
     if (!settings.silent) {
       sound.hit();
@@ -9726,21 +8521,7 @@ function bootstrap() {
 
     if (zombie.health === 0) {
       zombieKills += 1;
-      awardBitz(ECONOMY.zombieKillReward);
-      if (currentMode === MODES.story && storyMissionState) {
-        storyMissionState.kills += 1;
-      }
       removeZombie(zombie);
-      if (currentMode === MODES.story && storyMissionState) {
-        const chapter = getCurrentStoryChapter();
-        if (
-          storyMissionState.kills >= chapter.goalKills &&
-          storyMissionState.spawned >= chapter.lineup.length &&
-          activeZombies.length === 0
-        ) {
-          completeStoryChapter();
-        }
-      }
     }
   }
 
@@ -10029,11 +8810,9 @@ function bootstrap() {
             ? t("status.modePrefix.pvp")
             : inSoloMiniGames
               ? t("status.modePrefix.minigames")
-              : currentMode === MODES.story
-                ? t("status.modePrefix.story")
-                : currentMode === MODES.zombie
-                  ? t("status.modePrefix.zombie")
-                  : t("status.modePrefix.single");
+              : currentMode === MODES.zombie
+                ? t("status.modePrefix.zombie")
+                : t("status.modePrefix.single");
       const tail = pointerLocked
         ? playerIsDead
           ? t("status.downed")
@@ -10095,8 +8874,6 @@ function bootstrap() {
         ? "小游戏分数：" + Math.round(miniGameScore) + progressText + (leadText ? " • " + leadText : "")
         : "Mini score: " + Math.round(miniGameScore) + progressText + (leadText ? " • " + leadText : "");
     } else {
-      const storyChapter = currentMode === MODES.story ? getCurrentStoryChapter() : null;
-      const storyThreats = currentMode === MODES.story ? getStoryThreatCounts() : null;
       zombieReadout.textContent = inHordeLobby
         ? !multiplayerRoomStarted
           ? t("status.roomWaiting", {
@@ -10111,20 +8888,12 @@ function bootstrap() {
           ? t("status.playersOnly", {
               players: remotePlayers.size + (multiplayerPlayerId ? 1 : 0),
             })
-          : currentMode === MODES.story && storyMissionState && storyChapter && storyThreats
-            ? t("status.storyObjective", {
-                chapter: getLocalizedStoryLabel(storyChapter),
-                progress: String(storyMissionState.kills) + " / " + String(storyChapter.goalKills),
-              }) + " • " + t("status.storyThreats", {
-                remaining: storyThreats.remaining,
-                bosses: storyThreats.bosses,
+          : currentMode === MODES.zombie
+            ? t("status.zombies", {
+                alive: activeZombies.length,
+                down: zombieKills,
               })
-            : currentMode === MODES.zombie
-              ? t("status.zombies", {
-                  alive: activeZombies.length,
-                  down: zombieKills,
-                })
-              : t("status.zombiesOffline");
+            : t("status.zombiesOffline");
 
       const respawnRemaining = Math.max(0, multiplayerRespawnAt - Date.now() / 1000);
       const tailText = playerIsDead
@@ -10145,11 +8914,9 @@ function bootstrap() {
               deaths: multiplayerDeaths,
               tail: tailText,
             })
-          : currentMode === MODES.story && storyMissionState && storyChapter
-            ? t("status.score", { kills: storyMissionState.kills, shots: totalShots })
-            : currentMode === MODES.zombie
-              ? t("status.score", { kills: zombieKills, shots: totalShots })
-              : t("status.hits", { hits: totalHits, shots: totalShots });
+          : currentMode === MODES.zombie
+            ? t("status.score", { kills: zombieKills, shots: totalShots })
+            : t("status.hits", { hits: totalHits, shots: totalShots });
     }
 
     weaponReadout.textContent = t("status.weapon", { weapon: currentWeapon.label });
@@ -10255,25 +9022,8 @@ function bootstrap() {
     }
   }
 
-  function rebuildActiveChunkBlocks() {
-    for (const [key, chunk] of activeChunks) {
-      for (let i = chunk.blocks.length - 1; i >= 0; i -= 1) {
-        removeBlockMesh(chunk.blocks[i]);
-      }
-      const parts = String(key).split(",");
-      const chunkX = Number(parts[0]);
-      const chunkZ = Number(parts[1]);
-      chunk.blocks = Number.isFinite(chunkX) && Number.isFinite(chunkZ)
-        ? buildChunkBlocks(chunkX, chunkZ)
-        : [];
-    }
-  }
-
   function buildChunkBlocks(chunkX, chunkZ) {
     const blocks = [];
-    if (currentMode === MODES.story) {
-      return blocks;
-    }
     const count =
       BLOCKS.minPerChunk +
       Math.floor(
@@ -10474,7 +9224,7 @@ function bootstrap() {
       compressor.release.value = 0.14;
 
       masterGain = context.createGain();
-      masterGain.gain.value = 0.34;
+      masterGain.gain.value = 0.18;
       syncMasterGain();
 
       masterGain.connect(compressor);
@@ -11149,39 +9899,6 @@ function bootstrap() {
       });
     }
 
-    function preview(level) {
-      resume();
-      if (!context || context.state === "suspended") {
-        return;
-      }
-      const gain = THREE.MathUtils.clamp(Number(level) || 0.8, 0.18, 1);
-      playTone({
-        type: "sine",
-        startFrequency: 360,
-        endFrequency: 760,
-        duration: 0.09,
-        peak: 0.038 * gain,
-        end: 0.0001,
-      });
-      playTone({
-        type: "triangle",
-        startFrequency: 220,
-        endFrequency: 320,
-        duration: 0.12,
-        peak: 0.024 * gain,
-        end: 0.0001,
-        delay: 0.03,
-      });
-      playNoise({
-        duration: 0.03,
-        peak: 0.028 * gain,
-        end: 0.0001,
-        filterFrequency: 2200,
-        filterEndFrequency: 900,
-        q: 1,
-      });
-    }
-
     function explosion() {
       if (!context || context.state === "suspended") {
         return;
@@ -11218,7 +9935,7 @@ function bootstrap() {
       if (!masterGain) {
         return;
       }
-      masterGain.gain.value = (audioSettings && audioSettings.muted ? 0 : (audioSettings ? audioSettings.volume : 1)) * 0.34;
+      masterGain.gain.value = (audioSettings && audioSettings.muted ? 0 : (audioSettings ? audioSettings.volume : 1)) * 0.18;
     }
 
     function setVolume(value) {
@@ -11253,7 +9970,6 @@ function bootstrap() {
       pickupWeapon: pickupWeapon,
       throwBomb: throwBomb,
       explosion: explosion,
-      preview: preview,
       setVolume: setVolume,
       setMuted: setMuted,
     };
@@ -12074,23 +10790,22 @@ function bootstrap() {
     };
   }
 
-  function createZombie(id, archetypeId) {
+  function createZombie(id) {
     const group = new THREE.Group();
-    const monster = getZombieArchetype(archetypeId);
 
     const fleshMaterial = new THREE.MeshStandardMaterial({
-      color: monster.flesh,
+      color: 0x5a8b48,
       roughness: 0.88,
       metalness: 0.04,
     });
     const clothMaterial = new THREE.MeshStandardMaterial({
-      color: monster.cloth,
+      color: 0x413f57,
       roughness: 0.74,
       metalness: 0.08,
     });
     const glowMaterial = new THREE.MeshStandardMaterial({
-      color: monster.glow,
-      emissive: monster.emissive,
+      color: 0xb8ff89,
+      emissive: 0x3b5d16,
       emissiveIntensity: 0.4,
       roughness: 0.4,
       metalness: 0.1,
@@ -12136,57 +10851,6 @@ function bootstrap() {
     );
     jawGlow.position.set(0, -0.06, -0.42);
     head.add(jawGlow);
-
-    if (monster.id === 'runner') {
-      torso.rotation.x = -0.24;
-      head.position.set(0, 1.22, -0.28);
-      const runnerFin = new THREE.Mesh(
-        new THREE.BoxGeometry(0.12, 0.92, 0.62),
-        glowMaterial
-      );
-      runnerFin.position.set(0, 0.28, 0.26);
-      runnerFin.rotation.x = 0.36;
-      torso.add(runnerFin);
-    } else if (monster.id === 'brute') {
-      chest.scale.set(1.26, 1.18, 1.2);
-      hips.scale.set(1.2, 1.08, 1.12);
-      const rightShoulderPlate = new THREE.Mesh(
-        new THREE.BoxGeometry(0.7, 0.32, 0.72),
-        glowMaterial
-      );
-      rightShoulderPlate.position.set(1.02, 0.44, 0);
-      torso.add(rightShoulderPlate);
-      const leftShoulderPlate = rightShoulderPlate.clone();
-      leftShoulderPlate.position.x = -1.02;
-      torso.add(leftShoulderPlate);
-      const horn = new THREE.Mesh(
-        new THREE.BoxGeometry(0.12, 0.54, 0.12),
-        glowMaterial
-      );
-      horn.position.set(0.26, 0.54, -0.1);
-      horn.rotation.z = 0.32;
-      head.add(horn);
-      const hornLeft = horn.clone();
-      hornLeft.position.x = -0.26;
-      hornLeft.rotation.z = -0.32;
-      head.add(hornLeft);
-    } else if (monster.id === 'ember') {
-      const emberCrown = new THREE.Mesh(
-        new THREE.BoxGeometry(0.72, 0.18, 0.72),
-        glowMaterial
-      );
-      emberCrown.position.set(0, 0.56, 0);
-      head.add(emberCrown);
-      const emberSpine = new THREE.Mesh(
-        new THREE.BoxGeometry(0.24, 1.14, 0.24),
-        glowMaterial
-      );
-      emberSpine.position.set(0, 0.16, 0.42);
-      torso.add(emberSpine);
-    } else {
-      torso.rotation.z = -0.08;
-      head.rotation.z = 0.14;
-    }
 
     const rightArm = new THREE.Group();
     rightArm.position.set(0.92, 3.58, -0.02);
@@ -12276,12 +10940,8 @@ function bootstrap() {
     badge.sprite.position.set(0, 6.15, 0);
     group.add(badge.sprite);
 
-    group.scale.setScalar(monster.scale);
-
     const zombie = {
       id: id,
-      monsterType: monster.id,
-      archetype: monster,
       group: group,
       torso: torso,
       head: head,
@@ -12291,11 +10951,7 @@ function bootstrap() {
       leftLeg: leftLeg,
       hitbox: hitbox,
       badge: badge,
-      health: monster.health,
-      maxHealth: monster.health,
-      badgeFill: monster.badgeFill,
-      badgeEdge: monster.badgeEdge,
-      badgeLabel: t("monster." + monster.id) + " " + String(id),
+      health: ZOMBIES.maxHealth,
       attackCooldown: 0.35 + Math.random() * 0.4,
       attackPulse: 0,
       moving: false,
@@ -12306,11 +10962,11 @@ function bootstrap() {
     hitbox.userData.zombie = zombie;
     updateHealthBadge(
       badge,
-      zombie.badgeLabel,
+      getZombieLabel(id),
       zombie.health,
-      zombie.maxHealth,
-      monster.badgeFill,
-      monster.badgeEdge
+      ZOMBIES.maxHealth,
+      "#89ff72",
+      "#d64040"
     );
 
     return zombie;

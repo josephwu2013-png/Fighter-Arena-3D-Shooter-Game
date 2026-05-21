@@ -7,46 +7,14 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     <title>Fighter Arena</title>
-    <link rel="stylesheet" href="./src/style.css?v=20260510k" />
+    <link rel="stylesheet" href="./src/style.css?v=20260517-mobile3" />
   </head>
   <body>
     <div class="menu-screen" id="menuScreen">
       <div class="menu-shell">
-        <div class="menu-toolbar">
-          <div class="menu-picker">
-            <span class="menu-picker__label" id="languageLabel">Language</span>
-            <div class="menu-picker__buttons">
-              <button class="menu-toggle" id="languageEnButton" type="button">English</button>
-              <button class="menu-toggle" id="languageZhButton" type="button">中文</button>
-            </div>
-          </div>
-          <div class="menu-picker">
-            <span class="menu-picker__label" id="controlLabel">Controls</span>
-            <div class="menu-picker__buttons">
-              <button class="menu-toggle" id="controlDesktopButton" type="button">Desktop</button>
-              <button class="menu-toggle" id="controlPadButton" type="button">Mobile</button>
-            </div>
-          </div>
-          <div class="menu-picker">
-            <span class="menu-picker__label" id="sensitivityLabel">Sensitivity</span>
-            <div class="menu-picker__buttons menu-picker__buttons--compact">
-              <button class="menu-toggle" id="sensitivityDownButton" type="button">-</button>
-              <span class="menu-value" id="sensitivityValue">100%</span>
-              <button class="menu-toggle" id="sensitivityUpButton" type="button">+</button>
-            </div>
-          </div>
-          <div class="menu-picker">
-            <span class="menu-picker__label" id="screenFitLabel">Screen Fit</span>
-            <div class="menu-picker__buttons">
-              <button class="menu-toggle" id="screenFitOpenButton" type="button">Adjust Frame</button>
-            </div>
-          </div>
-          <div class="menu-picker">
-            <span class="menu-picker__label" id="controlFitLabel">Control Fit</span>
-            <div class="menu-picker__buttons">
-              <button class="menu-toggle" id="controlFitOpenButton" type="button">Adjust Buttons</button>
-            </div>
-          </div>
+        <div class="menu-actions">
+          <button class="menu-toggle menu-actions__button" id="settingsOpenButton" type="button">Settings</button>
+          <span class="menu-actions__account" id="accountStatusChip">Guest</span>
         </div>
 
         <p class="eyebrow" id="menuEyebrow">Prototype Build</p>
@@ -72,6 +40,14 @@
             <span id="zombieModeDescription">
               Fight off spawned zombies, track your health, and rotate between
               rifles, flame streams, bombs, and knife kills before they reach you.
+            </span>
+          </button>
+
+          <button class="mode-card mode-card--story" id="storyModeButton" type="button">
+            <span class="mode-card__tag" id="storyModeTag">Campaign</span>
+            <strong id="storyModeTitle">Story Mode</strong>
+            <span id="storyModeDescription">
+              Push through chained missions, fight different monster types, and clear handcrafted maps with houses, choke points, and boss-heavy finales.
             </span>
           </button>
 
@@ -104,6 +80,93 @@
       </div>
     </div>
 
+    <div class="settings-panel is-hidden" id="settingsPanel">
+      <div class="settings-panel__panel">
+        <div class="settings-panel__header">
+          <div>
+            <p class="eyebrow" id="settingsEyebrow">Settings</p>
+            <h2 id="settingsTitle">Settings And Account</h2>
+            <p class="settings-panel__summary" id="settingsSummary">
+              Keep every setting in one place, then sign in on this browser to keep your layout, audio, loadout, and progress tied to your account.
+            </p>
+          </div>
+          <button class="menu-toggle settings-panel__close" id="settingsCloseButton" type="button">Close</button>
+        </div>
+        <div class="settings-panel__grid">
+          <section class="settings-panel__section">
+            <p class="settings-panel__label" id="settingsAccountLabel">Account</p>
+            <p class="settings-panel__status" id="accountStatusText">
+              Guest mode on this browser. Sign in to keep your data.
+            </p>
+            <div class="settings-panel__account-row settings-panel__account-row--inputs">
+              <input class="room-browser__input" id="accountNameInput" type="text" maxlength="24" placeholder="Account name" />
+              <input class="room-browser__input" id="accountPasswordInput" type="password" maxlength="48" placeholder="Password" />
+            </div>
+            <div class="settings-panel__account-row">
+              <button class="start-button" id="accountLoginButton" type="button">Log In / Create</button>
+              <button class="menu-toggle" id="accountSaveButton" type="button">Save</button>
+              <button class="menu-toggle" id="accountLogoutButton" type="button">Log Out</button>
+            </div>
+          </section>
+          <section class="settings-panel__section">
+            <p class="settings-panel__label" id="settingsGameLabel">Game Settings</p>
+            <div class="menu-toolbar settings-panel__toolbar">
+              <div class="menu-picker">
+                <span class="menu-picker__label" id="languageLabel">Language</span>
+                <div class="menu-picker__buttons">
+                  <button class="menu-toggle" id="languageEnButton" type="button">English</button>
+                  <button class="menu-toggle" id="languageZhButton" type="button">中文</button>
+                </div>
+              </div>
+              <div class="menu-picker">
+                <span class="menu-picker__label" id="controlLabel">Controls</span>
+                <div class="menu-picker__buttons">
+                  <button class="menu-toggle" id="controlDesktopButton" type="button">Desktop</button>
+                  <button class="menu-toggle" id="controlPadButton" type="button">Mobile</button>
+                </div>
+              </div>
+              <div class="menu-picker">
+                <span class="menu-picker__label" id="sensitivityLabel">Sensitivity</span>
+                <div class="menu-picker__buttons menu-picker__buttons--compact">
+                  <button class="menu-toggle" id="sensitivityDownButton" type="button">-</button>
+                  <span class="menu-value" id="sensitivityValue">100%</span>
+                  <button class="menu-toggle" id="sensitivityUpButton" type="button">+</button>
+                </div>
+              </div>
+              <div class="menu-picker">
+                <span class="menu-picker__label" id="soundLabel">Sound</span>
+                <div class="menu-picker__buttons menu-picker__buttons--compact">
+                  <button class="menu-toggle" id="soundMuteButton" type="button">Mute</button>
+                  <button class="menu-toggle" id="soundDownButton" type="button">-</button>
+                  <span class="menu-value" id="soundValue">100%</span>
+                  <button class="menu-toggle" id="soundUpButton" type="button">+</button>
+                </div>
+              </div>
+              <div class="menu-picker">
+                <span class="menu-picker__label" id="touchStyleLabel">Mobile HUD</span>
+                <div class="menu-picker__buttons">
+                  <button class="menu-toggle" id="touchStyleClassicButton" type="button">Classic</button>
+                  <button class="menu-toggle" id="touchStyleCompactButton" type="button">Compact</button>
+                </div>
+              </div>
+              <div class="menu-picker">
+                <span class="menu-picker__label" id="screenFitLabel">Screen Fit</span>
+                <div class="menu-picker__buttons">
+                  <button class="menu-toggle" id="screenFitOpenButton" type="button">Adjust Frame</button>
+                </div>
+              </div>
+              <div class="menu-picker">
+                <span class="menu-picker__label" id="controlFitLabel">Control Fit</span>
+                <div class="menu-picker__buttons">
+                  <button class="menu-toggle" id="controlFitOpenButton" type="button">Adjust Buttons</button>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+
     <div class="room-browser is-hidden" id="miniGameBrowser">
       <div class="room-browser__panel room-browser__panel--mini-games">
         <div class="room-browser__header">
@@ -117,6 +180,22 @@
           <button class="menu-toggle room-browser__close" id="miniGameBrowserCloseButton" type="button">Close</button>
         </div>
         <div class="mini-game-grid" id="miniGameGrid"></div>
+      </div>
+    </div>
+
+    <div class="room-browser is-hidden" id="storyBrowser">
+      <div class="room-browser__panel room-browser__panel--mini-games">
+        <div class="room-browser__header">
+          <div>
+            <p class="eyebrow" id="storyBrowserEyebrow">Story Mode</p>
+            <h2 id="storyBrowserTitle">Campaign Map</h2>
+            <p class="room-browser__summary" id="storyBrowserSummary">
+              Move chapter by chapter through a full campaign. Each mission changes the map, the monster lineup, and the pressure.
+            </p>
+          </div>
+          <button class="menu-toggle room-browser__close" id="storyBrowserCloseButton" type="button">Close</button>
+        </div>
+        <div class="mini-game-grid" id="storyChapterGrid"></div>
       </div>
     </div>
 
@@ -203,7 +282,7 @@
     <div class="hud">
       <div class="brand">
         <p class="eyebrow" id="brandEyebrow">Single Player</p>
-        <h1>Fighter Arena</h1>
+        <h1 id="brandTitle">Fighter Arena</h1>
         <p class="summary" id="brandSummary">
           Smooth terrain, reload management, a six-slot loadout, and streamed
           targets across the world.
@@ -213,8 +292,18 @@
 
       <div class="panel is-hidden" id="panel">
         <button class="start-button" id="startButton" type="button">Resume Mission</button>
-        <button class="menu-toggle panel-fit-button" id="screenFitPauseButton" type="button">Screen Fit</button>
-        <button class="menu-toggle panel-fit-button" id="controlFitPauseButton" type="button">Control Fit</button>
+        <button class="menu-toggle panel-settings-button" id="panelSettingsButton" type="button">Settings</button>
+        <button class="menu-toggle panel-fit-button panel-settings-legacy" id="screenFitPauseButton" type="button">Screen Fit</button>
+        <button class="menu-toggle panel-fit-button panel-settings-legacy" id="controlFitPauseButton" type="button">Control Fit</button>
+        <div class="panel-audio panel-settings-legacy">
+          <span class="panel-audio__label" id="panelSoundLabel">Sound</span>
+          <div class="panel-audio__controls">
+            <button class="menu-toggle" id="panelSoundMuteButton" type="button">Mute</button>
+            <button class="menu-toggle" id="panelSoundDownButton" type="button">-</button>
+            <span class="menu-value" id="panelSoundValue">100%</span>
+            <button class="menu-toggle" id="panelSoundUpButton" type="button">+</button>
+          </div>
+        </div>
         <p id="instructionLine1">
           <kbd>WASD</kbd> move, <kbd>Shift</kbd> sprint, <kbd>Space</kbd> jump,
           mouse to look.
@@ -231,7 +320,10 @@
       <div class="shop-panel is-hidden" id="shopPanel">
         <div class="shop-panel__topline">
           <p class="eyebrow" id="shopEyebrow">Field Shop</p>
-          <span class="shop-panel__credits" id="shopCredits">Credits: 0</span>
+          <div class="shop-panel__actions">
+            <span class="shop-panel__credits" id="shopCredits">Bitz: 0</span>
+            <button class="menu-toggle shop-panel__close" id="shopCloseButton" type="button">Close</button>
+          </div>
         </div>
         <h2 id="shopTitle">Weapon Shop</h2>
         <p class="shop-panel__summary" id="shopSummary">
@@ -293,6 +385,10 @@
       Party
     </button>
 
+    <button class="menu-toggle phone-emu-rotate-button is-hidden" id="phoneEmuRotateButton" type="button">
+      Landscape
+    </button>
+
     <div class="touch-ui" id="touchUi" hidden>
       <div class="touch-look" id="touchLookArea" aria-hidden="true"></div>
       <div class="touch-joystick" id="touchJoystick" aria-hidden="true">
@@ -308,6 +404,7 @@
         <button class="touch-action" id="touchReloadButton" type="button">Reload</button>
         <button class="touch-action" id="touchHealButton" type="button">Heal</button>
         <button class="touch-action" id="touchViewButton" type="button">View</button>
+        <button class="touch-action" id="touchRotateButton" type="button">Rotate</button>
         <button class="touch-action" id="touchPickupButton" type="button">Pick Up</button>
         <button class="touch-action" id="touchWallButton" type="button">Wall</button>
         <button class="touch-action" id="touchShopButton" type="button">Shop</button>
@@ -392,6 +489,101 @@
           }
         }
 
+        const BOOT_MESSAGE_VARIANT_CLASSES = [
+          "is-info",
+          "is-success",
+          "is-warning",
+          "is-error",
+          "is-compact",
+          "is-detailed"
+        ];
+
+        function clearBootMessageClasses() {
+          if (!bootMessage) {
+            return;
+          }
+          bootMessage.classList.remove.apply(bootMessage.classList, BOOT_MESSAGE_VARIANT_CLASSES);
+        }
+
+        function inferBootMessageTone(message) {
+          const value = String(message || "").toLowerCase();
+          if (!value) {
+            return "info";
+          }
+          if (
+            value.includes("error") ||
+            value.includes("failed") ||
+            value.includes("unavailable") ||
+            value.includes("不可用") ||
+            value.includes("失败") ||
+            value.includes("错误") ||
+            value.includes("expired") ||
+            value.includes("wrong password")
+          ) {
+            return "error";
+          }
+          if (
+            value.includes("unsupported") ||
+            value.includes("blocked") ||
+            value.includes("not found") ||
+            value.includes("need ") ||
+            value.includes("等待") ||
+            value.includes("冷却") ||
+            value.includes("没找到") ||
+            value.includes("不够") ||
+            value.includes("不能")
+          ) {
+            return "warning";
+          }
+          if (
+            value.includes("saved") ||
+            value.includes("created") ||
+            value.includes("logged in") ||
+            value.includes("signed in") ||
+            value.includes("unlocked") ||
+            value.includes("deployed") ||
+            value.includes("live") ||
+            value.includes("started") ||
+            value.includes("完成") ||
+            value.includes("成功") ||
+            value.includes("已开始") ||
+            value.includes("已保存") ||
+            value.includes("已解锁") ||
+            value.includes("已放下")
+          ) {
+            return "success";
+          }
+          return "info";
+        }
+
+        function inferBootMessageScale(message) {
+          const length = String(message || "").trim().length;
+          if (length <= 44) {
+            return "compact";
+          }
+          if (length >= 92) {
+            return "detailed";
+          }
+          return "normal";
+        }
+
+        function shouldSuppressBootMessage() {
+          const body = document.body;
+          if (!body) {
+            return false;
+          }
+          return (
+            body.classList.contains("is-ingame") &&
+            !body.classList.contains("is-panel-open") &&
+            !body.classList.contains("is-settings-open") &&
+            !body.classList.contains("is-social-open") &&
+            !body.classList.contains("is-shop-open") &&
+            !body.classList.contains("is-story-open") &&
+            !body.classList.contains("is-screen-fit-editing") &&
+            !body.classList.contains("is-control-fit-editing")
+          );
+        }
+
         function hideBootMessageImmediately() {
           if (!bootMessage) {
             return;
@@ -399,6 +591,7 @@
 
           clearBootMessageTimers();
           bootMessage.classList.remove("is-visible");
+          clearBootMessageClasses();
           bootMessage.hidden = true;
           bootMessage.textContent = "";
         }
@@ -416,6 +609,18 @@
             return;
           }
 
+          clearBootMessageClasses();
+          const tone = inferBootMessageTone(nextMessage);
+          const scale = inferBootMessageScale(nextMessage);
+          if (shouldSuppressBootMessage()) {
+            hideBootMessageImmediately();
+            return;
+          }
+          bootMessage.classList.add("is-" + tone);
+          if (scale === "compact" || scale === "detailed") {
+            bootMessage.classList.add("is-" + scale);
+          }
+
           bootMessage.hidden = false;
           bootMessage.textContent = nextMessage;
           window.requestAnimationFrame(function () {
@@ -426,6 +631,7 @@
             bootMessage.classList.remove("is-visible");
             bootMessageHideTimer = window.setTimeout(function () {
               bootMessage.hidden = true;
+              clearBootMessageClasses();
               bootMessage.textContent = "";
               bootMessageHideTimer = 0;
             }, BOOT_MESSAGE_FADE_MS);
@@ -436,7 +642,11 @@
         window.__fighterArenaSetBootMessage = setBootMessage;
 
         window.addEventListener("error", function (event) {
-          setBootMessage("Startup error: " + (event.message || "Unknown error"));
+          const detail =
+            event && event.error && event.error.name
+              ? event.error.name + ": " + (event.error.message || event.message || "Unknown error")
+              : event.message || "Unknown error";
+          setBootMessage("Startup error: " + detail);
         });
 
         window.addEventListener("unhandledrejection", function (event) {
@@ -449,6 +659,6 @@
         });
       })();
     </script>
-    <script type="module" src="./src/main.js?v=20260510k"></script>
+    <script type="module" src="./src/main.js?v=20260516e"></script>
   </body>
 </html>
