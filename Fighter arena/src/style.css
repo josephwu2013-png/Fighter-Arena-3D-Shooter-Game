@@ -3788,3 +3788,439 @@ body.is-menu-open .free-mouse-button {
     max-height: 22dvh;
   }
 }
+
+
+/* Phone emulation synced with real mobile UI */
+body.is-phone-emulation .menu-screen,
+body.is-phone-emulation .settings-panel,
+body.is-phone-emulation .room-browser {
+  padding:
+    max(8px, var(--safe-top))
+    max(8px, var(--safe-right))
+    max(10px, var(--safe-bottom))
+    max(8px, var(--safe-left));
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+body.is-phone-emulation .menu-shell,
+body.is-phone-emulation .settings-panel__panel,
+body.is-phone-emulation .room-browser__panel,
+body.is-phone-emulation .social-panel,
+body.is-phone-emulation .shop-panel {
+  margin: auto;
+  width: calc(var(--play-width) - 16px);
+  max-width: calc(var(--play-width) - 16px);
+  max-height: calc(var(--play-height) - 16px);
+  border-radius: 18px;
+  box-shadow: 0 20px 48px rgba(0, 12, 22, 0.22);
+}
+
+body.is-phone-emulation .settings-panel__panel,
+body.is-phone-emulation .room-browser__panel,
+body.is-phone-emulation .social-panel,
+body.is-phone-emulation .shop-panel {
+  padding: 14px;
+}
+
+body.is-phone-emulation .settings-panel__header,
+body.is-phone-emulation .room-browser__header,
+body.is-phone-emulation .social-panel__header,
+body.is-phone-emulation .shop-panel__topline,
+body.is-phone-emulation .shop-panel__actions {
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+body.is-phone-emulation .settings-panel__grid,
+body.is-phone-emulation .room-browser__grid,
+body.is-phone-emulation .social-panel__grid,
+body.is-phone-emulation .mini-game-grid {
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+body.is-phone-emulation .settings-panel__section,
+body.is-phone-emulation .room-browser__section,
+body.is-phone-emulation .social-panel__section {
+  padding: 12px;
+  border-radius: 16px;
+}
+
+body.is-phone-emulation .settings-panel__account-row,
+body.is-phone-emulation .settings-panel__account-row--inputs,
+body.is-phone-emulation .room-browser__row,
+body.is-phone-emulation .social-panel__composer,
+body.is-phone-emulation .menu-picker__buttons,
+body.is-phone-emulation .mini-game-card__buttons {
+  grid-template-columns: 1fr;
+  gap: 8px;
+  flex-direction: column;
+}
+
+body.is-phone-emulation .room-browser__input,
+body.is-phone-emulation .room-browser__select,
+body.is-phone-emulation .social-panel__input,
+body.is-phone-emulation .menu-toggle,
+body.is-phone-emulation .start-button {
+  min-height: 42px;
+}
+
+body.is-phone-emulation .room-browser__list,
+body.is-phone-emulation .social-panel__list,
+body.is-phone-emulation .social-panel__chat-log {
+  max-height: 28dvh;
+}
+
+body.is-phone-emulation .menu-shell {
+  min-height: auto;
+  padding: 14px;
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    "actions"
+    "eyebrow"
+    "title"
+    "cards";
+  row-gap: 8px;
+  column-gap: 0;
+  background:
+    linear-gradient(180deg, rgba(6, 24, 39, 0.9), rgba(6, 24, 39, 0.72)),
+    radial-gradient(circle at 85% 18%, rgba(82, 199, 255, 0.16), transparent 22%),
+    radial-gradient(circle at 18% 88%, rgba(141, 244, 200, 0.12), transparent 26%);
+}
+
+body.is-phone-emulation .menu-shell::after {
+  inset: auto 0 0 0;
+  width: 100%;
+  height: 22%;
+  border-radius: 18px;
+  opacity: 0.3;
+}
+
+body.is-phone-emulation #menuSummary {
+  display: none;
+}
+
+body.is-phone-emulation #menuTitle {
+  max-width: 4.4ch;
+  font-size: clamp(2rem, 8vw, 3rem);
+}
+
+body.is-phone-emulation .menu-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
+  margin-bottom: 0;
+  align-items: stretch;
+}
+
+body.is-phone-emulation .menu-actions__button,
+body.is-phone-emulation .menu-actions__account {
+  width: 100%;
+  min-height: 40px;
+  max-width: none;
+  justify-content: center;
+}
+
+body.is-phone-emulation .mode-grid,
+body.is-phone-emulation .mode-grid--four {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+body.is-phone-emulation .mode-card {
+  min-height: 112px;
+  padding: 12px;
+  border-radius: 16px;
+  gap: 6px;
+}
+
+body.is-phone-emulation .mode-card strong {
+  font-size: clamp(1.18rem, 5.6vw, 1.55rem);
+}
+
+body.is-phone-emulation .mode-card span:last-child {
+  font-size: 0.78rem;
+  line-height: 1.28;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+body.is-phone-emulation.is-phone-emulation-landscape .menu-shell,
+body.is-phone-emulation.is-phone-emulation-landscape .settings-panel__panel,
+body.is-phone-emulation.is-phone-emulation-landscape .room-browser__panel,
+body.is-phone-emulation.is-phone-emulation-landscape .social-panel,
+body.is-phone-emulation.is-phone-emulation-landscape .shop-panel {
+  width: calc(var(--play-width) - 16px);
+  max-width: calc(var(--play-width) - 16px);
+  min-height: min(calc(var(--play-height) - 16px), 420px);
+}
+
+body.is-phone-emulation.is-phone-emulation-landscape .menu-shell {
+  padding: 12px;
+  grid-template-columns: minmax(158px, 0.7fr) minmax(0, 1.3fr);
+  grid-template-areas:
+    "actions actions"
+    "title cards"
+    "title cards";
+  column-gap: 12px;
+  row-gap: 8px;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(6, 24, 39, 0.9), rgba(6, 24, 39, 0.74)),
+    radial-gradient(circle at 84% 24%, rgba(82, 199, 255, 0.14), transparent 24%),
+    radial-gradient(circle at 12% 90%, rgba(141, 244, 200, 0.1), transparent 24%);
+}
+
+body.is-phone-emulation.is-phone-emulation-landscape #menuEyebrow,
+body.is-phone-emulation.is-phone-emulation-landscape #menuSummary {
+  display: none;
+}
+
+body.is-phone-emulation.is-phone-emulation-landscape #menuTitle {
+  align-self: start;
+  margin-top: 2px;
+  max-width: 3.5ch;
+  font-size: clamp(1.7rem, 5vw, 2.45rem);
+  line-height: 0.9;
+}
+
+body.is-phone-emulation.is-phone-emulation-landscape .mode-grid,
+body.is-phone-emulation.is-phone-emulation-landscape .mode-grid--four {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+body.is-phone-emulation.is-phone-emulation-landscape .mode-card {
+  min-height: 96px;
+  padding: 10px 11px;
+  gap: 4px;
+}
+
+body.is-phone-emulation.is-phone-emulation-landscape .mode-card__tag {
+  font-size: 0.62rem;
+  padding: 0.24rem 0.5rem;
+}
+
+body.is-phone-emulation.is-phone-emulation-landscape .mode-card strong {
+  font-size: clamp(1rem, 2.3vw, 1.28rem);
+}
+
+body.is-phone-emulation.is-phone-emulation-landscape .mode-card span:last-child {
+  font-size: 0.7rem;
+  line-height: 1.22;
+}
+
+body.is-phone-emulation.is-phone-emulation-landscape .room-browser__list,
+body.is-phone-emulation.is-phone-emulation-landscape .social-panel__list,
+body.is-phone-emulation.is-phone-emulation-landscape .social-panel__chat-log {
+  max-height: 22dvh;
+}
+
+
+.debug-overlay {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 25;
+  width: min(380px, calc(100vw - 36px));
+  max-height: min(72vh, 720px);
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(5, 22, 35, 0.86);
+  color: rgba(232, 246, 255, 0.96);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 24px 48px rgba(2, 10, 18, 0.34);
+  pointer-events: none;
+  opacity: 1;
+  overflow: hidden;
+}
+
+.debug-overlay.is-hidden {
+  display: none;
+}
+
+.debug-overlay__title {
+  margin: 0 0 8px;
+  font-size: 0.8rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(141, 244, 200, 0.92);
+}
+
+.debug-overlay__content {
+  margin: 0;
+  max-height: min(64vh, 640px);
+  overflow: auto;
+  white-space: pre-wrap;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+body.is-phone-emulation .debug-overlay,
+body.is-mobile-controls .debug-overlay {
+  top: calc(var(--play-top) + 10px);
+  right: calc(var(--play-right) + 10px);
+  width: min(340px, calc(var(--play-width) - 20px));
+  max-height: calc(var(--play-height) - 20px);
+}
+
+body.is-phone-emulation.is-mobile-controls.is-phone-emulation-landscape .debug-overlay {
+  width: min(320px, calc(var(--play-width) * 0.38));
+}
+
+body.is-phone-emulation.is-mobile-controls.is-mobile-portrait .debug-overlay {
+  width: min(320px, calc(var(--play-width) - 20px));
+}
+
+body.is-phone-emulation.is-mobile-controls .hud .brand {
+  display: none !important;
+}
+
+body.is-phone-emulation.is-mobile-controls .hud {
+  z-index: 9;
+  padding: 10px;
+  gap: 8px;
+  pointer-events: none;
+}
+
+body.is-phone-emulation.is-mobile-controls .status {
+  max-width: calc(var(--play-width) - 20px);
+  gap: 6px;
+}
+
+body.is-phone-emulation.is-mobile-controls .status span {
+  padding: 6px 9px;
+  font-size: 0.72rem;
+}
+
+body.is-phone-emulation.is-mobile-controls .sprint-meter {
+  min-width: min(250px, calc(var(--play-width) - 20px));
+  max-width: calc(var(--play-width) - 20px);
+  padding: 8px 10px 10px;
+}
+
+body.is-phone-emulation.is-mobile-controls .sprint-meter__label,
+body.is-phone-emulation.is-mobile-controls .sprint-meter__value {
+  font-size: 0.7rem;
+}
+
+body.is-phone-emulation.is-mobile-controls .coords-readout {
+  left: calc(var(--play-left) + 10px);
+  bottom: calc(var(--play-bottom) + 102px + env(safe-area-inset-bottom, 0px));
+  z-index: 6;
+  font-size: 0.72rem;
+  padding: 5px 8px;
+}
+
+body.is-phone-emulation.is-mobile-controls .loadout-bar {
+  position: fixed;
+  left: calc(var(--play-left) + 10px);
+  right: calc(var(--play-right) + 10px);
+  bottom: calc(var(--play-bottom) + 10px + env(safe-area-inset-bottom, 0px));
+  z-index: 13;
+  pointer-events: auto;
+  width: auto;
+  max-width: none;
+  gap: 6px;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0 0 calc(6px + env(safe-area-inset-bottom, 0px));
+  scrollbar-width: none;
+}
+
+body.is-phone-emulation.is-mobile-controls .loadout-bar::-webkit-scrollbar {
+  display: none;
+}
+
+body.is-phone-emulation.is-mobile-controls .loadout-slot {
+  min-width: 88px;
+  padding: 8px 10px 9px;
+  border-radius: 16px;
+  gap: 3px;
+  flex: 0 0 auto;
+  touch-action: manipulation;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body.is-phone-emulation.is-mobile-controls .loadout-slot__name {
+  font-size: 0.84rem;
+}
+
+body.is-phone-emulation.is-mobile-controls .loadout-slot__meta,
+body.is-phone-emulation.is-mobile-controls .loadout-slot__index {
+  font-size: 0.68rem;
+}
+
+body.is-phone-emulation.is-mobile-controls .touch-actions {
+  right: calc(var(--play-right) + 8px + env(safe-area-inset-right, 0px));
+  bottom: calc(var(--play-bottom) + 126px + env(safe-area-inset-bottom, 0px));
+  z-index: 7;
+  grid-template-columns: repeat(2, minmax(68px, 82px));
+  gap: 8px;
+}
+
+body.is-phone-emulation.is-mobile-controls .touch-action {
+  min-height: 50px;
+  font-size: 0.78rem;
+  border-radius: 18px;
+}
+
+body.is-phone-emulation.is-mobile-controls .touch-joystick {
+  left: calc(var(--play-left) + 8px + env(safe-area-inset-left, 0px));
+  bottom: calc(var(--play-bottom) + 126px + env(safe-area-inset-bottom, 0px));
+  z-index: 7;
+  width: 110px;
+  height: 110px;
+}
+
+body.is-phone-emulation.is-mobile-controls .touch-joystick__base {
+  width: 110px;
+  height: 110px;
+}
+
+body.is-phone-emulation.is-mobile-controls .touch-joystick__stick {
+  width: 56px;
+  height: 56px;
+}
+
+body.is-phone-emulation.is-mobile-controls .touch-look {
+  inset: 0;
+}
+
+body.is-phone-emulation.is-mobile-controls.is-mobile-portrait .status {
+  max-width: calc(var(--play-width) - 16px);
+  gap: 5px;
+}
+
+body.is-phone-emulation.is-mobile-controls.is-mobile-portrait .status span {
+  padding: 5px 8px;
+  font-size: 0.68rem;
+}
+
+body.is-phone-emulation.is-mobile-controls.is-mobile-portrait .sprint-meter {
+  min-width: min(220px, calc(var(--play-width) - 16px));
+  max-width: calc(var(--play-width) - 16px);
+  padding: 7px 9px 9px;
+}
+
+body.is-phone-emulation.is-mobile-controls.is-mobile-portrait .coords-readout {
+  bottom: calc(var(--play-bottom) + 102px + env(safe-area-inset-bottom, 0px));
+  font-size: 0.68rem;
+  padding: 5px 7px;
+}
+
+body.is-phone-emulation.is-mobile-controls.is-mobile-portrait .touch-look {
+  inset: 0 0 calc(188px + env(safe-area-inset-bottom, 0px)) 0;
+}
+
+body.is-phone-emulation.is-mobile-controls.is-mobile-portrait .loadout-slot {
+  min-width: 82px;
+}

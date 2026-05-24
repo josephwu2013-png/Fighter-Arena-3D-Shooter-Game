@@ -1459,6 +1459,8 @@ function bootstrap() {
   const touchChatButton = document.getElementById("touchChatButton");
   const socialHudButton = document.getElementById("socialHudButton");
   const phoneEmuRotateButton = document.getElementById("phoneEmuRotateButton");
+  const debugOverlay = document.getElementById("debugOverlay");
+  const debugOverlayContent = document.getElementById("debugOverlayContent");
   const screenFitEditor = document.getElementById("screenFitEditor");
   const screenFitEyebrow = document.getElementById("screenFitEyebrow");
   const screenFitTitle = document.getElementById("screenFitTitle");
@@ -1837,6 +1839,9 @@ function bootstrap() {
   let phoneEmulationEnabled = false;
   let phoneEmulationSnapshot = null;
   let phoneEmulationLandscape = false;
+  let debugOverlayOpen = false;
+  let debugFrameMsSmoothed = 16.7;
+  let debugFpsSmoothed = 60;
   const LOOK_SENSITIVITY_STORAGE_KEY = "fighterArena.lookSensitivity.v1";
   const LOOK_SENSITIVITY_MIN = 0.45;
   const LOOK_SENSITIVITY_MAX = 1.9;
@@ -2012,6 +2017,32 @@ function bootstrap() {
     return THREE.MathUtils.clamp(Math.round(numeric * 100) / 100, LOOK_SENSITIVITY_MIN, LOOK_SENSITIVITY_MAX);
   }
 
+  function readStoredJson(key) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw == null) {
+        return null;
+      }
+      const trimmed = String(raw).trim();
+      if (!trimmed || trimmed === "undefined") {
+        try {
+          localStorage.removeItem(key);
+        } catch (_cleanupError) {
+          // Ignore storage cleanup failures.
+        }
+        return null;
+      }
+      return JSON.parse(trimmed);
+    } catch (_error) {
+      try {
+        localStorage.removeItem(key);
+      } catch (_cleanupError) {
+        // Ignore storage cleanup failures.
+      }
+      return null;
+    }
+  }
+
   function loadLookSensitivity() {
     try {
       return sanitizeLookSensitivity(localStorage.getItem(LOOK_SENSITIVITY_STORAGE_KEY));
@@ -2060,7 +2091,7 @@ function bootstrap() {
 
   function loadAudioSettings() {
     try {
-      const parsed = JSON.parse(localStorage.getItem(AUDIO_SETTINGS_STORAGE_KEY) || "null");
+      const parsed = readStoredJson(AUDIO_SETTINGS_STORAGE_KEY);
       return {
         volume: sanitizeAudioVolume(parsed && parsed.volume),
         muted: Boolean(parsed && parsed.muted),
@@ -2182,7 +2213,7 @@ function bootstrap() {
 
   function loadStoryProgress() {
     try {
-      return sanitizeStoryProgress(JSON.parse(localStorage.getItem(STORY_PROGRESS_STORAGE_KEY) || "null"));
+      return sanitizeStoryProgress(readStoredJson(STORY_PROGRESS_STORAGE_KEY));
     } catch (_error) {
       return createDefaultStoryProgress();
     }
@@ -2335,7 +2366,7 @@ function bootstrap() {
 
   function loadAccountDatabase() {
     try {
-      const parsed = JSON.parse(localStorage.getItem(ACCOUNT_DB_STORAGE_KEY) || "null");
+      const parsed = readStoredJson(ACCOUNT_DB_STORAGE_KEY);
       return parsed && parsed.accounts && typeof parsed.accounts === "object"
         ? { accounts: parsed.accounts }
         : { accounts: {} };
@@ -2668,7 +2699,7 @@ function bootstrap() {
     let parsed = null;
 
     try {
-      parsed = JSON.parse(localStorage.getItem(SCREEN_FIT_STORAGE_KEY) || "null");
+      parsed = readStoredJson(SCREEN_FIT_STORAGE_KEY);
     } catch (_error) {
       parsed = null;
     }
@@ -2840,7 +2871,7 @@ function bootstrap() {
     let parsed = null;
 
     try {
-      parsed = JSON.parse(localStorage.getItem(CONTROL_LAYOUT_STORAGE_KEY) || "null");
+      parsed = readStoredJson(CONTROL_LAYOUT_STORAGE_KEY);
     } catch (_error) {
       parsed = null;
     }
@@ -3337,6 +3368,7 @@ function bootstrap() {
     document.body.classList.toggle("is-story-open", storyBrowserOpen);
     document.body.classList.toggle("is-phone-emulation", phoneEmulationEnabled);
     document.body.classList.toggle("is-phone-emulation-landscape", phoneEmulationEnabled && phoneEmulationLandscape);
+    document.body.classList.toggle("is-debug-open", debugOverlayOpen);
     document.body.classList.toggle("is-menu-open", menuVisible);
     document.body.classList.toggle(
       "is-mobile-session",
@@ -3377,6 +3409,7 @@ function bootstrap() {
     phoneEmuRotateButton.textContent = phoneEmulationLandscape
       ? t("phoneEmu.rotatePortrait")
       : t("phoneEmu.rotateLandscape");
+    debugOverlay.classList.toggle("is-hidden", !debugOverlayOpen);
   }
 
   function setPlayingState(active) {
@@ -3783,6 +3816,10 @@ function bootstrap() {
       togglePhoneEmulation();
       return true;
     }
+    if (code === "F4") {
+      toggleDebugOverlay();
+      return true;
+    }
     if (code === "F5") {
       if (developerModeEnabled) {
         deactivateDeveloperMode();
@@ -3792,6 +3829,100 @@ function bootstrap() {
       return true;
     }
     return false;
+  }
+
+
+  function toggleDebugOverlay() {
+    debugOverlayOpen = !debugOverlayOpen;
+    if (debugOverlayOpen) {
+      updateDebugOverlay(0, performance.now());
+      setBootMessage(selectedLanguage === LANGUAGES.zh ? "调试面板已开启。" : "Debug overlay on.");
+    } else {
+      setBootMessage(selectedLanguage === LANGUAGES.zh ? "调试面板已关闭。" : "Debug overlay off.");
+    }
+    refreshSessionChrome();
+  }
+
+  function formatDebugNumber(value, digits) {
+    const precision = typeof digits === "number" ? digits : 2;
+    return Number.isFinite(Number(value)) ? Number(value).toFixed(precision) : "--";
+  }
+
+  function formatDebugFlag(value) {
+    return value ? "yes" : "no";
+  }
+
+  function updateDebugOverlay(delta, now) {
+    if (!debugOverlayOpen || !debugOverlayContent) {
+      return;
+    }
+
+    if (delta > 0) {
+      debugFrameMsSmoothed += ((delta * 1000) - debugFrameMsSmoothed) * 0.14;
+      debugFpsSmoothed += ((1 / Math.max(delta, 0.0001)) - debugFpsSmoothed) * 0.14;
+    }
+
+    const currentWeapon = getSelectedWeapon();
+    const nowSeconds = now / 1000;
+    const slideActive = nowSeconds < slideActiveUntil;
+    const potionCooldown = Math.max(0, healingPotionReadyAt - nowSeconds);
+    const wallCooldown = Math.max(0, wallBuildReadyAt - nowSeconds);
+    const slideCooldown = Math.max(0, slideCooldownReadyAt - nowSeconds);
+    const activeMiniGameIdForDebug = getActiveMiniGameId() || DEFAULT_MINI_GAME_ID;
+    const roomCode = multiplayerRoomCode || "--";
+    const roomName = multiplayerRoomName || "--";
+    const controlMode = selectedControlScheme === CONTROL_SCHEMES.pad ? "mobile" : "desktop";
+    const touchStyle = selectedTouchStyle || "classic";
+    const phoneMode = phoneEmulationEnabled ? (phoneEmulationLandscape ? "emulated-landscape" : "emulated-portrait") : "off";
+    const rendererCalls = renderer && renderer.info && renderer.info.render ? renderer.info.render.calls : 0;
+    const rendererTriangles = renderer && renderer.info && renderer.info.render ? renderer.info.render.triangles : 0;
+    const modeLabel = String(currentMode || "menu");
+    const variantLabel = currentMode === MODES.multiplayer ? String(multiplayerVariant || "pvp") : "solo";
+    const velocityHorizontal = Math.sqrt((player.velocity.x * player.velocity.x) + (player.velocity.z * player.velocity.z));
+    const lines = [
+      '[session]',
+      'build=' + GAME_BUILD_LABEL + ' lang=' + selectedLanguage + ' controls=' + controlMode + ' touch=' + touchStyle,
+      'phoneEmu=' + phoneMode + ' pointer=' + formatDebugFlag(pointerLocked) + ' thirdPerson=' + formatDebugFlag(thirdPersonEnabled),
+      'mode=' + modeLabel + ' variant=' + variantLabel + ' miniGame=' + activeMiniGameIdForDebug,
+      '',
+      '[performance]',
+      'fps=' + formatDebugNumber(debugFpsSmoothed, 1) + ' frameMs=' + formatDebugNumber(debugFrameMsSmoothed, 1),
+      'drawCalls=' + rendererCalls + ' triangles=' + rendererTriangles,
+      'chunks=' + activeChunks.size + ' queued=' + queuedKeys.size + ' buildQueue=' + buildQueue.length,
+      '',
+      '[player]',
+      'pos=(' + formatDebugNumber(player.position.x, 1) + ', ' + formatDebugNumber(player.position.y, 1) + ', ' + formatDebugNumber(player.position.z, 1) + ')',
+      'yaw=' + formatDebugNumber(player.yaw, 2) + ' pitch=' + formatDebugNumber(player.pitch, 2) + ' grounded=' + formatDebugFlag(player.grounded),
+      'vel=(' + formatDebugNumber(player.velocity.x, 2) + ', ' + formatDebugNumber(player.velocity.y, 2) + ', ' + formatDebugNumber(player.velocity.z, 2) + ') speed=' + formatDebugNumber(velocityHorizontal, 2),
+      'health=' + Math.round(playerHealth) + '/' + PLAYER.maxHealth + ' dead=' + formatDebugFlag(playerIsDead) + ' damageCd=' + formatDebugNumber(playerDamageCooldown, 2),
+      '',
+      '[combat]',
+      'weapon=' + currentWeapon.label + ' slot=' + (selectedWeaponIndex + 1) + ' owned=' + ownedWeapons.filter(Boolean).length + '/' + ownedWeapons.length,
+      'ammo=' + ammoInMag + '/' + reserveAmmo + ' reload=' + formatDebugFlag(isReloading) + ' reloadTimer=' + formatDebugNumber(reloadTimer, 2),
+      'aim=' + formatDebugFlag(controls.aiming) + ' shoot=' + formatDebugFlag(controls.shooting) + ' heat=' + formatDebugNumber(weaponHeat, 2) + ' cooldown=' + formatDebugNumber(weaponCooldown, 2),
+      '',
+      '[mobility]',
+      'sprint=' + formatDebugFlag(controls.sprint) + ' energy=' + formatDebugNumber(sprintEnergy, 1) + '/' + MOBILITY.sprintMax + ' exhausted=' + formatDebugFlag(sprintExhausted),
+      'slideActive=' + formatDebugFlag(slideActive) + ' slideCd=' + formatDebugNumber(slideCooldown, 1) + ' potionCd=' + formatDebugNumber(potionCooldown, 1) + ' wallCd=' + formatDebugNumber(wallCooldown, 1),
+      '',
+      '[touch]',
+      'moveVector=(' + formatDebugNumber(touchMoveVector.x, 2) + ', ' + formatDebugNumber(touchMoveVector.y, 2) + ')',
+      'touchMove=' + formatDebugFlag(touchMoveState.active) + ' touchLook=' + formatDebugFlag(touchLookState.active) + ' lookSensitivity=' + formatDebugNumber(lookSensitivity, 2),
+      '',
+      '[world]',
+      'zombies=' + activeZombies.length + ' remotePlayers=' + remotePlayers.size + ' pickups=' + droppedWeapons.length,
+      'dynamicBlocks=' + dynamicBlocks.length + ' debris=' + debrisPieces.length + ' bullets=' + bullets.length + ' flames=' + flames.length + ' bombs=' + bombs.length + ' explosions=' + explosions.length,
+      'storyStructures=' + storyStructureIds.length + ' solids=' + solidObstacleMeshes.length + ' waterY=' + formatDebugNumber(water.position.y, 2),
+      '',
+      '[network]',
+      'room=' + roomCode + ' name=' + roomName + ' players=' + multiplayerRoomPlayerCount + ' min=' + multiplayerRoomMinPlayers + ' started=' + formatDebugFlag(multiplayerRoomStarted),
+      'playerId=' + (multiplayerPlayerId || '--') + ' syncInFlight=' + formatDebugFlag(multiplayerSyncInFlight) + ' pollInFlight=' + formatDebugFlag(multiplayerPollInFlight),
+      'social=' + formatDebugFlag(socialPanelOpen) + ' shop=' + formatDebugFlag(shopPanelOpen) + ' settings=' + formatDebugFlag(settingsPanelOpen) + ' roomBrowser=' + formatDebugFlag(roomBrowserOpen),
+      '',
+      '[economy]',
+      'bitz=' + Math.round(playerBitz) + ' audio=' + Math.round(audioSettings.volume * 100) + '% mute=' + formatDebugFlag(audioSettings.muted) + ' devMode=' + formatDebugFlag(developerModeEnabled),
+    ];
+    debugOverlayContent.textContent = lines.join("\n");
   }
 
   function renderMiniGameBrowser() {
@@ -7966,6 +8097,7 @@ function bootstrap() {
     updateCameraTransform(delta);
     animateWater(now * 0.0015);
     updateReadouts(delta);
+    updateDebugOverlay(delta, now);
 
     renderer.render(scene, camera);
   }

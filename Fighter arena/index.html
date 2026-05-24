@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     <title>Fighter Arena</title>
-    <link rel="stylesheet" href="./src/style.css?v=20260517-mobile3" />
+    <link rel="stylesheet" href="./src/style.css?v=20260523-hotfix2" />
   </head>
   <body>
     <div class="menu-screen" id="menuScreen">
@@ -389,6 +389,11 @@
       Landscape
     </button>
 
+    <aside class="debug-overlay is-hidden" id="debugOverlay" aria-live="off">
+      <div class="debug-overlay__title">Debug / Developer</div>
+      <pre class="debug-overlay__content" id="debugOverlayContent"></pre>
+    </aside>
+
     <div class="touch-ui" id="touchUi" hidden>
       <div class="touch-look" id="touchLookArea" aria-hidden="true"></div>
       <div class="touch-joystick" id="touchJoystick" aria-hidden="true">
@@ -659,6 +664,6 @@
         });
       })();
     </script>
-    <script type="module" src="./src/main.js?v=20260516e"></script>
+    <script type="module" src="./src/main.js?v=20260523-hotfix2"></script>
   </body>
 </html>
