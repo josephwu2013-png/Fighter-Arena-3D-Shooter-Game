@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>Fighter Arena</title>
+    <link rel="stylesheet" href="./src/style.css?v=20260609-ui-pass7" />
+  </head>
+  <body>
+    <div class="menu-screen" id="menuScreen">
+      <div class="menu-shell">
+        <div class="menu-actions">
+          <button class="menu-toggle menu-actions__button" id="guideOpenButton" type="button">Beginner Guide</button>
+          <button class="menu-toggle menu-actions__button" id="settingsOpenButton" type="button">Settings</button>
+          <span class="menu-actions__account" id="accountStatusChip">Guest</span>
+        </div>
+
+        <p class="eyebrow" id="menuEyebrow">Prototype Build</p>
+        <h1 id="menuTitle">Fighter Arena</h1>
+        <p class="summary" id="menuSummary">
+          Smooth world generation is live. Choose your mode, your controls, and
+          your language before dropping into the arena.
+        </p>
+
+        <div class="menu-quick-grid" id="menuQuickGrid">
+          <article class="menu-quick-card">
+            <p class="menu-quick-card__label" id="menuQuickStartTitle">Start Smart</p>
+            <p class="menu-quick-card__body" id="menuQuickStartBody">Single Player is the easiest warm-up. Learn movement, aiming, and the shovel before you jump online.</p>
+          </article>
+          <article class="menu-quick-card">
+            <p class="menu-quick-card__label" id="menuQuickControlsTitle">Core Controls</p>
+            <p class="menu-quick-card__body" id="menuQuickControlsBody">Use 1-7 to swap gear, R to reload, H to heal, V to change camera, and J to reopen the beginner guide.</p>
+          </article>
+          <article class="menu-quick-card">
+            <p class="menu-quick-card__label" id="menuQuickShareTitle">Play Together</p>
+            <p class="menu-quick-card__body" id="menuQuickShareBody">Friends on the same Wi-Fi use your local IP. Internet play needs a public server or port forwarding.</p>
+          </article>
+        </div>
+
+        <div class="mode-grid mode-grid--four">
+          <button class="mode-card mode-card--live" id="singlePlayerButton" type="button">
+            <span class="mode-card__tag" id="singlePlayerTag">Available</span>
+            <strong id="singlePlayerTitle">Single Player</strong>
+            <span id="singlePlayerDescription">
+              Explore the terrain, swap across a full seven-slot loadout, and dig
+              trenches through the world with a new shovel.
+            </span>
+          </button>
+
+          <button class="mode-card mode-card--zombie" id="zombieModeButton" type="button">
+            <span class="mode-card__tag" id="zombieModeTag">Hot Zone</span>
+            <strong id="zombieModeTitle">Zombie Mode</strong>
+            <span id="zombieModeDescription">
+              Fight off spawned zombies, track your health, and rotate between
+              rifles, flame streams, bombs, and knife kills before they reach you.
+            </span>
+          </button>
+
+          <button class="mode-card mode-card--story" id="storyModeButton" type="button">
+            <span class="mode-card__tag" id="storyModeTag">Campaign</span>
+            <strong id="storyModeTitle">Story Mode</strong>
+            <span id="storyModeDescription">
+              Push through chained missions, fight different monster types, and clear handcrafted maps with houses, choke points, and boss-heavy finales.
+            </span>
+          </button>
+
+          <button class="mode-card mode-card--multiplayer" id="multiplayerPvpButton" type="button">
+            <span class="mode-card__tag" id="multiplayerPvpTag">Classic</span>
+            <strong id="multiplayerPvpTitle">Multiplayer PvP</strong>
+            <span id="multiplayerPvpDescription">
+              Keep the original online arena with shared players, live movement,
+              and direct player-vs-player fights.
+            </span>
+          </button>
+
+          <button class="mode-card mode-card--multiplayer-horde" id="multiplayerHordeButton" type="button">
+            <span class="mode-card__tag" id="multiplayerHordeTag">New</span>
+            <strong id="multiplayerHordeTitle">Multiplayer Horde</strong>
+            <span id="multiplayerHordeDescription">
+              Join friends in the same arena, survive shared zombie waves, and
+              still watch for rival players in real time.
+            </span>
+          </button>
+
+          <button class="mode-card mode-card--arcade" id="miniGamesButton" type="button">
+            <span class="mode-card__tag" id="miniGamesTag">Party</span>
+            <strong id="miniGamesTitle">Mini Games</strong>
+            <span id="miniGamesDescription">
+              Jump into fast solo challenges or open a room and rotate through a full set of party-style mini games with friends.
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-panel is-hidden" id="settingsPanel" hidden>
+      <div class="settings-panel__panel">
+        <div class="settings-panel__header">
+          <div>
+            <p class="eyebrow" id="settingsEyebrow">Settings</p>
+            <h2 id="settingsTitle">Settings And Account</h2>
+            <p class="settings-panel__summary" id="settingsSummary">
+              Keep every setting in one place, then sign in on this browser to keep your layout, audio, loadout, and progress tied to your account.
+            </p>
+          </div>
+          <button class="menu-toggle settings-panel__close" id="settingsCloseButton" type="button">Close</button>
+        </div>
+        <div class="settings-panel__grid">
+          <section class="settings-panel__section">
+            <p class="settings-panel__label" id="settingsAccountLabel">Account</p>
+            <p class="settings-panel__status" id="accountStatusText">
+              Guest mode on this browser. Sign in to keep your data.
+            </p>
+            <div class="settings-panel__account-row settings-panel__account-row--inputs" autocomplete="off">
+              <input class="room-browser__input" id="accountNameInput" name="username" type="text" maxlength="24" placeholder="Account name" autocomplete="off" autocapitalize="off" spellcheck="false" />
+              <input class="room-browser__input" id="accountPasswordInput" name="current-password" type="password" maxlength="48" placeholder="Password" autocomplete="off" autocapitalize="off" spellcheck="false" />
+            </div>
+            <div class="settings-panel__account-row">
+              <button class="start-button" id="accountLoginButton" type="button">Log In / Create</button>
+              <button class="menu-toggle" id="accountSaveButton" type="button">Save</button>
+              <button class="menu-toggle" id="accountLogoutButton" type="button">Log Out</button>
+            </div>
+          </section>
+          <section class="settings-panel__section">
+            <p class="settings-panel__label" id="settingsGameLabel">Game Settings</p>
+            <div class="menu-toolbar settings-panel__toolbar">
+              <div class="menu-picker">
+                <span class="menu-picker__label" id="languageLabel">Language</span>
+                <div class="menu-picker__buttons">
+                  <button class="menu-toggle" id="languageEnButton" type="button">English</button>
+                  <button class="menu-toggle" id="languageZhButton" type="button">中文</button>
+                </div>
+              </div>
+              <div class="menu-picker">
+                <span class="menu-picker__label" id="controlLabel">Controls</span>
+                <div class="menu-picker__buttons">
+                  <button class="menu-toggle" id="controlDesktopButton" type="button">Desktop</button>
+                  <button class="menu-toggle" id="controlPadButton" type="button">Mobile</button>
+                </div>
+              </div>
+              <div class="menu-picker">
+                <span class="menu-picker__label" id="sensitivityLabel">Sensitivity</span>
+                <div class="menu-picker__buttons menu-picker__buttons--compact">
+                  <button class="menu-toggle" id="sensitivityDownButton" type="button">-</button>
+                  <span class="menu-value" id="sensitivityValue">100%</span>
+                  <button class="menu-toggle" id="sensitivityUpButton" type="button">+</button>
+                </div>
+              </div>
+              <div class="menu-picker">
+                <span class="menu-picker__label" id="fovLabel">Field Of View</span>
+                <div class="menu-picker__buttons menu-picker__buttons--compact">
+                  <button class="menu-toggle" id="fovDownButton" type="button">-</button>
+                  <span class="menu-value" id="fovValue">75°</span>
+                  <button class="menu-toggle" id="fovUpButton" type="button">+</button>
+                </div>
+              </div>
+              <div class="menu-picker">
+                <span class="menu-picker__label" id="soundLabel">Sound</span>
+                <div class="menu-picker__buttons menu-picker__buttons--compact">
+                  <button class="menu-toggle" id="soundMuteButton" type="button">Mute</button>
+                  <button class="menu-toggle" id="soundDownButton" type="button">-</button>
+                  <span class="menu-value" id="soundValue">100%</span>
+                  <button class="menu-toggle" id="soundUpButton" type="button">+</button>
+                </div>
+              </div>
+              <div class="menu-picker">
+                <span class="menu-picker__label" id="musicToggleLabel">Music</span>
+                <div class="menu-picker__buttons">
+                  <button class="menu-toggle" id="musicOnButton" type="button">On</button>
+                  <button class="menu-toggle" id="musicOffButton" type="button">Off</button>
+                </div>
+              </div>
+              <div class="menu-picker">
+                <span class="menu-picker__label" id="musicVolumeLabel">Music Volume</span>
+                <div class="menu-picker__buttons menu-picker__buttons--compact">
+                  <button class="menu-toggle" id="musicVolumeDownButton" type="button">-</button>
+                  <span class="menu-value" id="musicVolumeValue">100%</span>
+                  <button class="menu-toggle" id="musicVolumeUpButton" type="button">+</button>
+                </div>
+              </div>
+              <div class="menu-picker">
+                <span class="menu-picker__label" id="musicAutoLabel">Auto Start Music</span>
+                <div class="menu-picker__buttons">
+                  <button class="menu-toggle" id="musicAutoOnButton" type="button">On</button>
+                  <button class="menu-toggle" id="musicAutoOffButton" type="button">Off</button>
+                </div>
+              </div>
+              <div class="menu-picker">
+                <span class="menu-picker__label" id="musicPopupLabel">Song Popups</span>
+                <div class="menu-picker__buttons">
+                  <button class="menu-toggle" id="musicPopupOnButton" type="button">On</button>
+                  <button class="menu-toggle" id="musicPopupOffButton" type="button">Off</button>
+                </div>
+              </div>
+              <div class="menu-picker">
+                <span class="menu-picker__label" id="musicSkipLabel">Track Control</span>
+                <div class="menu-picker__buttons">
+                  <button class="menu-toggle" id="musicSkipButton" type="button">Next Track</button>
+                </div>
+              </div>
+              <div class="menu-picker">
+                <span class="menu-picker__label" id="bootHintsLabel">Tips And Popups</span>
+                <div class="menu-picker__buttons">
+                  <button class="menu-toggle" id="bootHintsOnButton" type="button">On</button>
+                  <button class="menu-toggle" id="bootHintsOffButton" type="button">Off</button>
+                </div>
+              </div>
+              <div class="menu-picker">
+                <span class="menu-picker__label" id="showAllButtonsLabel">ShowALL Buttons</span>
+                <div class="menu-picker__buttons">
+                  <button class="menu-toggle" id="showAllButtonsOnButton" type="button">On</button>
+                  <button class="menu-toggle" id="showAllButtonsOffButton" type="button">Off</button>
+                </div>
+              </div>
+              <div class="menu-picker">
+                <span class="menu-picker__label" id="touchStyleLabel">Mobile HUD</span>
+                <div class="menu-picker__buttons">
+                  <button class="menu-toggle" id="touchStyleClassicButton" type="button">Classic</button>
+                  <button class="menu-toggle" id="touchStyleCompactButton" type="button">Compact</button>
+                </div>
+              </div>
+              <div class="menu-picker">
+                <span class="menu-picker__label" id="screenFitLabel">Screen Fit</span>
+                <div class="menu-picker__buttons">
+                  <button class="menu-toggle" id="screenFitOpenButton" type="button">Adjust Frame</button>
+                </div>
+              </div>
+              <div class="menu-picker">
+                <span class="menu-picker__label" id="controlFitLabel">Control Fit</span>
+                <div class="menu-picker__buttons">
+                  <button class="menu-toggle" id="controlFitOpenButton" type="button">Adjust Buttons</button>
+                </div>
+              </div>
+            </div>
+          </section>
+          <section class="settings-panel__section settings-panel__section--guide" id="settingsGuideSection">
+            <div class="settings-guide__head">
+              <div>
+                <p class="settings-panel__label" id="settingsGuideLabel">Beginner Guide</p>
+                <p class="settings-panel__status" id="settingsGuideSummary">
+                  Quick controls, mode tips, and the easiest way to get into a match.
+                </p>
+              </div>
+            </div>
+            <div class="settings-guide__grid" id="settingsGuideContent"></div>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-panel is-hidden" id="guidePanel">
+      <div class="settings-panel__panel guide-panel__panel">
+        <div class="settings-panel__header">
+          <div>
+            <p class="eyebrow" id="guideEyebrow">Start Here</p>
+            <h2 id="guideTitle">Beginner Guide</h2>
+            <p class="settings-panel__summary" id="guideSummary">
+              Learn the controls, the modes, and the fastest way to get moving before you drop into the arena.
+            </p>
+          </div>
+          <button class="menu-toggle settings-panel__close" id="guideCloseButton" type="button">Close</button>
+        </div>
+        <div class="guide-panel__grid" id="guidePanelContent"></div>
+      </div>
+    </div>
+
+    <div class="room-browser is-hidden" id="miniGameBrowser">
+      <div class="room-browser__panel room-browser__panel--mini-games">
+        <div class="room-browser__header">
+          <div>
+            <p class="eyebrow" id="miniGameBrowserEyebrow">Mini Games</p>
+            <h2 id="miniGameBrowserTitle">Mini Games Hub</h2>
+            <p class="room-browser__summary" id="miniGameBrowserSummary">
+              Pick a fast challenge for solo play, or open a room and bring friends in with public rooms or private codes.
+            </p>
+          </div>
+          <button class="menu-toggle room-browser__close" id="miniGameBrowserCloseButton" type="button">Close</button>
+        </div>
+        <div class="mini-game-grid" id="miniGameGrid"></div>
+      </div>
+    </div>
+
+    <div class="room-browser is-hidden" id="storyBrowser">
+      <div class="room-browser__panel room-browser__panel--mini-games">
+        <div class="room-browser__header">
+          <div>
+            <p class="eyebrow" id="storyBrowserEyebrow">Story Mode</p>
+            <h2 id="storyBrowserTitle">Campaign Map</h2>
+            <p class="room-browser__summary" id="storyBrowserSummary">
+              Move chapter by chapter through a full campaign. Each mission changes the map, the monster lineup, and the pressure.
+            </p>
+          </div>
+          <button class="menu-toggle room-browser__close" id="storyBrowserCloseButton" type="button">Close</button>
+        </div>
+        <div class="mini-game-grid" id="storyChapterGrid"></div>
+      </div>
+    </div>
+
+    <div class="room-browser is-hidden" id="roomBrowser">
+      <div class="room-browser__panel">
+        <div class="room-browser__header">
+          <div>
+            <p class="eyebrow" id="roomBrowserEyebrow">Rooms</p>
+            <h2 id="roomBrowserTitle">Multiplayer Rooms</h2>
+            <p class="room-browser__summary" id="roomBrowserSummary">
+              Browse public rooms, create a new match, or join a private room with a code.
+            </p>
+          </div>
+          <button class="menu-toggle room-browser__close" id="roomBrowserCloseButton" type="button">Close</button>
+        </div>
+
+        <div class="room-browser__grid">
+          <section class="room-browser__section">
+            <p class="room-browser__label" id="roomPlayerNameLabel">Player Name</p>
+            <input class="room-browser__input" id="roomPlayerNameInput" type="text" maxlength="24" placeholder="Player" />
+          </section>
+
+          <section class="room-browser__section">
+            <div class="room-browser__section-head">
+              <p class="room-browser__label" id="roomCreateLabel">Create Room</p>
+              <span class="room-browser__badge" id="roomCreatedCodeReadout" hidden></span>
+            </div>
+            <div class="room-browser__stack">
+              <input class="room-browser__input" id="roomNameInput" type="text" maxlength="36" placeholder="Room name" />
+              <div class="room-browser__row">
+                <label class="room-browser__field">
+                  <span id="roomModeLabel">Mode</span>
+                  <select class="room-browser__select" id="roomModeSelect">
+                    <option value="pvp">PvP</option>
+                    <option value="horde">Zombie Horde</option>
+                    <option value="arcade">Mini Games</option>
+                  </select>
+                </label>
+                <label class="room-browser__field">
+                  <span id="roomPrivacyLabel">Privacy</span>
+                  <select class="room-browser__select" id="roomPrivacySelect">
+                    <option value="public">Public</option>
+                    <option value="private">Private</option>
+                  </select>
+                </label>
+              </div>
+              <label class="room-browser__field" id="roomMiniGameField" hidden>
+                <span id="roomMiniGameLabel">Mini Game</span>
+                <select class="room-browser__select" id="roomMiniGameSelect">
+                  <option value="sharpshooter">Sharpshooter</option>
+                  <option value="zombie-blitz">Zombie Blitz</option>
+                  <option value="checkpoint-sprint">Checkpoint Sprint</option>
+                  <option value="distance-dash">Distance Dash</option>
+                </select>
+              </label>
+              <label class="room-browser__field" id="roomMinPlayersField">
+                <span id="roomMinPlayersLabel">Horde Start Players</span>
+                <input class="room-browser__input" id="roomMinPlayersInput" type="number" min="1" max="8" value="2" />
+              </label>
+              <button class="start-button room-browser__action" id="roomCreateButton" type="button">Create And Join</button>
+            </div>
+          </section>
+
+          <section class="room-browser__section">
+            <p class="room-browser__label" id="roomPrivateJoinLabel">Join Private Room</p>
+            <div class="room-browser__row">
+              <input class="room-browser__input" id="roomCodeInput" type="text" maxlength="6" placeholder="ABC123" />
+              <button class="menu-toggle room-browser__join-code" id="roomJoinCodeButton" type="button">Join Code</button>
+            </div>
+          </section>
+
+          <section class="room-browser__section room-browser__section--list">
+            <div class="room-browser__section-head">
+              <p class="room-browser__label" id="roomPublicListLabel">Public Rooms</p>
+              <button class="menu-toggle" id="roomRefreshButton" type="button">Refresh</button>
+            </div>
+            <div class="room-browser__list" id="roomList"></div>
+            <p class="room-browser__empty" id="roomListEmpty">No public rooms yet.</p>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <div class="hud">
+      <div class="brand">
+        <p class="eyebrow" id="brandEyebrow">Single Player</p>
+        <h1 id="brandTitle">Fighter Arena</h1>
+        <p class="summary" id="brandSummary">
+          Smooth terrain, reload management, a seven-slot loadout, and shovel-dug
+          terrain cuts across the world.
+        </p>
+        <p class="build-tag" id="buildTag">Build 2026.04.25c</p>
+      </div>
+
+      <div class="panel is-hidden" id="panel">
+        <button class="start-button" id="startButton" type="button">Resume Mission</button>
+        <button class="menu-toggle panel-settings-button" id="panelGuideButton" type="button">Guide</button>
+        <button class="menu-toggle panel-settings-button" id="panelSettingsButton" type="button">Settings</button>
+        <button class="menu-toggle panel-fit-button panel-settings-legacy" id="screenFitPauseButton" type="button">Screen Fit</button>
+        <button class="menu-toggle panel-fit-button panel-settings-legacy" id="controlFitPauseButton" type="button">Control Fit</button>
+        <div class="panel-audio panel-settings-legacy">
+          <span class="panel-audio__label" id="panelSoundLabel">Sound</span>
+          <div class="panel-audio__controls">
+            <button class="menu-toggle" id="panelSoundMuteButton" type="button">Mute</button>
+            <button class="menu-toggle" id="panelSoundDownButton" type="button">-</button>
+            <span class="menu-value" id="panelSoundValue">100%</span>
+            <button class="menu-toggle" id="panelSoundUpButton" type="button">+</button>
+          </div>
+        </div>
+        <p id="instructionLine1">
+          <kbd>WASD</kbd> move, <kbd>Shift</kbd> sprint, <kbd>Space</kbd> jump,
+          mouse to look.
+        </p>
+        <p id="instructionLine2">
+          <kbd>Mouse 1</kbd> attacks, <kbd>Mouse 2</kbd> aims, <kbd>1-7</kbd>
+          swaps gear, <kbd>R</kbd> reloads guns, <kbd>H</kbd> uses a heal
+          potion, <kbd>Q</kbd> drops your current weapon, <kbd>P</kbd> picks up
+          nearby gear, <kbd>B</kbd> opens the shop, and <kbd>V</kbd> swaps first
+          and third person. Press <kbd>Esc</kbd> to pause.
+        </p>
+      </div>
+
+      <div class="shop-panel is-hidden" id="shopPanel">
+        <div class="shop-panel__topline">
+          <p class="eyebrow" id="shopEyebrow">Field Shop</p>
+          <div class="shop-panel__actions">
+            <span class="shop-panel__credits" id="shopCredits">Bitz: 0</span>
+            <button class="menu-toggle shop-panel__close" id="shopCloseButton" type="button">Close</button>
+          </div>
+        </div>
+        <h2 id="shopTitle">Weapon Shop</h2>
+        <p class="shop-panel__summary" id="shopSummary">
+          Buy new guns, then equip them from your loadout once they are in your
+          inventory.
+        </p>
+        <div class="shop-grid" id="shopGrid"></div>
+      </div>
+
+      <div class="social-panel is-hidden" id="socialPanel">
+        <div class="social-panel__header">
+          <div>
+            <p class="eyebrow" id="socialEyebrow">Friends</p>
+            <h2 id="socialTitle">Friends And Chat</h2>
+          </div>
+          <button class="menu-toggle social-panel__close" id="socialCloseButton" type="button">Close</button>
+        </div>
+        <div class="social-panel__tabs" id="socialTabButtons">
+          <button class="menu-toggle is-selected" id="socialFriendsTabButton" type="button">Friends</button>
+          <button class="menu-toggle" id="socialLeaderboardTabButton" type="button">Leaderboard</button>
+        </div>
+        <div class="social-panel__view" id="socialFriendsView">
+          <div class="social-panel__grid social-panel__grid--friends">
+            <section class="social-panel__section">
+              <p class="social-panel__label" id="socialOnlineLabel">Online Players</p>
+              <div class="social-panel__list" id="socialOnlineList"></div>
+            </section>
+            <section class="social-panel__section">
+              <p class="social-panel__label" id="socialRequestsLabel">Friend Requests</p>
+              <div class="social-panel__list" id="socialRequestsList"></div>
+            </section>
+            <section class="social-panel__section">
+              <div class="social-panel__friend-head">
+                <div>
+                  <p class="social-panel__label" id="socialFriendsLabel">Friends</p>
+                  <span class="social-panel__friend-subtitle" id="socialSelectedFriend">Select a friend</span>
+                </div>
+                <div class="social-panel__voice-controls">
+                  <button class="menu-toggle" id="socialCallButton" type="button">Call</button>
+                  <button class="menu-toggle" id="socialVideoButton" type="button">Camera</button>
+                  <button class="menu-toggle" id="socialHangupButton" type="button">Hang Up</button>
+                </div>
+              </div>
+              <div class="social-panel__list" id="socialFriendsList"></div>
+              <div class="social-panel__incoming is-hidden" id="socialIncomingCallBox">
+                <div>
+                  <p class="social-panel__label" id="socialIncomingCallLabel">Incoming Call</p>
+                  <span class="social-panel__voice-status" id="socialIncomingCallStatus">Waiting</span>
+                </div>
+                <div class="social-panel__voice-controls">
+                  <button class="menu-toggle" id="socialAcceptCallButton" type="button">Accept</button>
+                  <button class="menu-toggle" id="socialRejectCallButton" type="button">Reject</button>
+                </div>
+              </div>
+              <div class="social-panel__video-stage" id="socialVideoStage">
+                <video class="social-panel__video social-panel__video--local" id="socialLocalVideo" autoplay muted playsinline></video>
+                <video class="social-panel__video social-panel__video--remote" id="socialRemoteVideo" autoplay playsinline></video>
+              </div>
+              <div class="social-panel__chat-log" id="socialDirectChatLog"></div>
+              <div class="social-panel__composer">
+                <input class="room-browser__input social-panel__input" id="socialDirectChatInput" type="text" maxlength="220" placeholder="Message a friend" />
+                <button class="start-button social-panel__send" id="socialDirectSendButton" type="button">Send</button>
+              </div>
+            </section>
+          </div>
+        </div>
+        <div class="social-panel__view is-hidden" id="socialLeaderboardView">
+          <div class="social-panel__grid">
+            <section class="social-panel__section">
+              <p class="social-panel__label" id="socialRosterLabel">Leaderboard</p>
+              <div class="social-panel__list" id="socialRosterList"></div>
+            </section>
+            <section class="social-panel__section">
+              <p class="social-panel__label" id="socialChatLabel">Room Chat</p>
+              <div class="social-panel__voice">
+                <div class="social-panel__voice-head">
+                  <p class="social-panel__label" id="socialVoiceLabel">Voice</p>
+                  <span class="social-panel__voice-status" id="socialVoiceStatus">Multiplayer only</span>
+                </div>
+                <div class="social-panel__voice-controls">
+                  <button class="menu-toggle" id="socialVoiceToggleButton" type="button">Join Voice</button>
+                  <button class="menu-toggle" id="socialVoiceMuteButton" type="button">Mute Mic</button>
+                </div>
+              </div>
+              <div class="social-panel__chat-log" id="socialChatLog"></div>
+              <div class="social-panel__composer">
+                <input class="room-browser__input social-panel__input" id="socialChatInput" type="text" maxlength="220" placeholder="Say something" />
+                <button class="start-button social-panel__send" id="socialSendButton" type="button">Send</button>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+
+      <div class="status" id="statusHud">
+        <span id="modeReadout">Mode: Menu</span>
+        <span id="healthReadout">Health: --</span>
+        <span id="zombieReadout">Zombies: --</span>
+        <span id="weaponReadout">Weapon: M134 Minigun</span>
+        <span id="ammoReadout">Ammo: --</span>
+        <span id="hitsReadout">Hits: --</span>
+      </div>
+
+      <div class="sprint-meter" id="sprintMeter" aria-label="Sprint Meter">
+        <div class="sprint-meter__row">
+          <span class="sprint-meter__label" id="sprintMeterLabel">Sprint</span>
+          <span class="sprint-meter__value" id="sprintMeterValue">100%</span>
+        </div>
+        <div class="sprint-meter__track">
+          <div class="sprint-meter__fill" id="sprintMeterFill"></div>
+        </div>
+      </div>
+
+      <div class="coords-readout" id="coordsReadout">X: -- Y: -- Z: --</div>
+
+      <div class="loadout-bar" id="loadoutBar" aria-label="Weapon Selection"></div>
+    </div>
+
+    <button class="menu-toggle social-hud-button is-hidden" id="socialHudButton" type="button">
+      Friends
+    </button>
+
+    <button class="menu-toggle leaderboard-hud-button is-hidden" id="leaderboardHudButton" type="button">
+      Leaderboard
+    </button>
+
+    <aside class="debug-overlay is-hidden" id="debugOverlay" aria-live="off">
+      <div class="debug-overlay__title" id="debugOverlayTitle">Debug / Developer</div>
+      <pre class="debug-overlay__content" id="debugOverlayContent"></pre>
+    </aside>
+
+    <div class="touch-ui" id="touchUi" hidden>
+      <div class="touch-look" id="touchLookArea" aria-hidden="true"></div>
+      <div class="touch-joystick" id="touchJoystick" aria-hidden="true">
+        <div class="touch-joystick__base"></div>
+        <div class="touch-joystick__stick" id="touchJoystickStick"></div>
+      </div>
+      <div class="touch-actions">
+        <button class="touch-action touch-action--primary" id="touchFireButton" type="button">Fire</button>
+        <button class="touch-action" id="touchAimButton" type="button">Aim</button>
+        <button class="touch-action touch-action--accent" id="touchSprintButton" type="button">Sprint</button>
+        <button class="touch-action" id="touchSlideButton" type="button">Slide</button>
+        <button class="touch-action" id="touchJumpButton" type="button">Jump</button>
+        <button class="touch-action" id="touchReloadButton" type="button">Reload</button>
+        <button class="touch-action" id="touchHealButton" type="button">Heal</button>
+        <button class="touch-action" id="touchViewButton" type="button">View</button>
+        <button class="touch-action" id="touchRotateButton" type="button">Rotate</button>
+        <button class="touch-action" id="touchPickupButton" type="button">Pick Up</button>
+        <button class="touch-action" id="touchWallButton" type="button">Wall</button>
+        <button class="touch-action" id="touchShopButton" type="button">Shop</button>
+        <button class="touch-action" id="touchChatButton" type="button">Chat</button>
+      </div>
+    </div>
+
+    <div class="screen-fit-editor" id="screenFitEditor" hidden>
+      <div class="screen-fit-editor__toolbar">
+        <div class="screen-fit-editor__copy">
+          <p class="eyebrow" id="screenFitEyebrow">Screen Fit</p>
+          <h2 id="screenFitTitle">Shape your play frame</h2>
+          <p class="screen-fit-editor__summary" id="screenFitSummary">
+            Drag the box to move it. Pull edges or corners to widen, narrow,
+            raise, or lower the gameplay frame for this control mode.
+          </p>
+        </div>
+        <div class="screen-fit-editor__buttons">
+          <button class="menu-toggle" id="screenFitResetButton" type="button">Reset</button>
+          <button class="start-button" id="screenFitDoneButton" type="button">Done</button>
+        </div>
+      </div>
+      <div class="screen-fit-stage" id="screenFitStage">
+        <div class="screen-fit-frame" id="screenFitFrame">
+          <div class="screen-fit-frame__label" id="screenFitFrameLabel">Desktop Frame</div>
+          <button class="screen-fit-handle screen-fit-handle--n" data-handle="n" type="button" aria-label="Resize top"></button>
+          <button class="screen-fit-handle screen-fit-handle--e" data-handle="e" type="button" aria-label="Resize right"></button>
+          <button class="screen-fit-handle screen-fit-handle--s" data-handle="s" type="button" aria-label="Resize bottom"></button>
+          <button class="screen-fit-handle screen-fit-handle--w" data-handle="w" type="button" aria-label="Resize left"></button>
+          <button class="screen-fit-handle screen-fit-handle--ne" data-handle="ne" type="button" aria-label="Resize top right"></button>
+          <button class="screen-fit-handle screen-fit-handle--nw" data-handle="nw" type="button" aria-label="Resize top left"></button>
+          <button class="screen-fit-handle screen-fit-handle--se" data-handle="se" type="button" aria-label="Resize bottom right"></button>
+          <button class="screen-fit-handle screen-fit-handle--sw" data-handle="sw" type="button" aria-label="Resize bottom left"></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="control-fit-editor" id="controlFitEditor" hidden>
+      <div class="control-fit-editor__toolbar">
+        <div class="control-fit-editor__copy">
+          <p class="eyebrow" id="controlFitEyebrow">Control Fit</p>
+          <h2 id="controlFitTitle">Tune your mobile buttons</h2>
+          <p class="control-fit-editor__summary" id="controlFitSummary">
+            Tap a button or the joystick to select it. Drag it anywhere, then use Smaller or Larger until it feels right on your phone.
+          </p>
+          <p class="control-fit-editor__selected" id="controlFitSelectedLabel">Selected: Joystick</p>
+        </div>
+        <div class="control-fit-editor__buttons">
+          <button class="menu-toggle" id="controlFitSmallerButton" type="button">Smaller</button>
+          <button class="menu-toggle" id="controlFitLargerButton" type="button">Larger</button>
+          <button class="menu-toggle" id="controlFitResetButton" type="button">Reset</button>
+          <button class="start-button" id="controlFitDoneButton" type="button">Done</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="reticle" aria-hidden="true"></div>
+    <div class="scope-overlay" id="scopeOverlay" aria-hidden="true">
+      <div class="scope-overlay__glass"></div>
+      <div class="scope-overlay__cross scope-overlay__cross--h"></div>
+      <div class="scope-overlay__cross scope-overlay__cross--v"></div>
+      <div class="scope-overlay__label" id="scopeOverlayLabel">Scope x3</div>
+    </div>
+    <div class="music-popup" id="musicPopup" hidden>
+      <span class="music-popup__eyebrow" id="musicPopupEyebrow">Now Playing</span>
+      <strong class="music-popup__title" id="musicPopupTitle">Fighter Arena Sunrise</strong>
+      <span class="music-popup__meta" id="musicPopupMeta">Arena Sessions</span>
+    </div>
+    <div class="boot-message" id="bootMessage" hidden></div>
+
+    <script>
+      (function () {
+        const bootMessage = document.getElementById("bootMessage");
+        const BOOT_MESSAGE_TIMEOUT_MS = 3800;
+        const BOOT_MESSAGE_FADE_MS = 220;
+        let bootMessageTimer = 0;
+        let bootMessageHideTimer = 0;
+
+        function clearBootMessageTimers() {
+          if (bootMessageTimer) {
+            window.clearTimeout(bootMessageTimer);
+            bootMessageTimer = 0;
+          }
+          if (bootMessageHideTimer) {
+            window.clearTimeout(bootMessageHideTimer);
+            bootMessageHideTimer = 0;
+          }
+        }
+
+        const BOOT_MESSAGE_VARIANT_CLASSES = [
+          "is-info",
+          "is-success",
+          "is-warning",
+          "is-error",
+          "is-compact",
+          "is-detailed"
+        ];
+
+        function clearBootMessageClasses() {
+          if (!bootMessage) {
+            return;
+          }
+          bootMessage.classList.remove.apply(bootMessage.classList, BOOT_MESSAGE_VARIANT_CLASSES);
+        }
+
+        function inferBootMessageTone(message) {
+          const value = String(message || "").toLowerCase();
+          if (!value) {
+            return "info";
+          }
+          if (
+            value.includes("error") ||
+            value.includes("failed") ||
+            value.includes("unavailable") ||
+            value.includes("不可用") ||
+            value.includes("失败") ||
+            value.includes("错误") ||
+            value.includes("expired") ||
+            value.includes("wrong password")
+          ) {
+            return "error";
+          }
+          if (
+            value.includes("unsupported") ||
+            value.includes("blocked") ||
+            value.includes("not found") ||
+            value.includes("need ") ||
+            value.includes("等待") ||
+            value.includes("冷却") ||
+            value.includes("没找到") ||
+            value.includes("不够") ||
+            value.includes("不能")
+          ) {
+            return "warning";
+          }
+          if (
+            value.includes("saved") ||
+            value.includes("created") ||
+            value.includes("logged in") ||
+            value.includes("signed in") ||
+            value.includes("unlocked") ||
+            value.includes("deployed") ||
+            value.includes("live") ||
+            value.includes("started") ||
+            value.includes("完成") ||
+            value.includes("成功") ||
+            value.includes("已开始") ||
+            value.includes("已保存") ||
+            value.includes("已解锁") ||
+            value.includes("已放下")
+          ) {
+            return "success";
+          }
+          return "info";
+        }
+
+        function inferBootMessageScale(message) {
+          const length = String(message || "").trim().length;
+          if (length <= 44) {
+            return "compact";
+          }
+          if (length >= 92) {
+            return "detailed";
+          }
+          return "normal";
+        }
+
+        function shouldSuppressBootMessage() {
+          const body = document.body;
+          if (!body) {
+            return false;
+          }
+          return (
+            body.classList.contains("is-ingame") &&
+            !body.classList.contains("is-panel-open") &&
+            !body.classList.contains("is-settings-open") &&
+            !body.classList.contains("is-social-open") &&
+            !body.classList.contains("is-shop-open") &&
+            !body.classList.contains("is-story-open") &&
+            !body.classList.contains("is-screen-fit-editing") &&
+            !body.classList.contains("is-control-fit-editing")
+          );
+        }
+
+        function hideBootMessageImmediately() {
+          if (!bootMessage) {
+            return;
+          }
+
+          clearBootMessageTimers();
+          bootMessage.classList.remove("is-visible");
+          clearBootMessageClasses();
+          bootMessage.hidden = true;
+          bootMessage.textContent = "";
+        }
+
+        function setBootMessage(message) {
+          if (!bootMessage) {
+            return;
+          }
+
+          const nextMessage = typeof message === "string" ? message : "";
+          clearBootMessageTimers();
+
+          if (!nextMessage) {
+            hideBootMessageImmediately();
+            return;
+          }
+
+          clearBootMessageClasses();
+          const tone = inferBootMessageTone(nextMessage);
+          const scale = inferBootMessageScale(nextMessage);
+          const bootHintsAllowed =
+            typeof window.__fighterArenaShouldShowBootHints === "function"
+              ? window.__fighterArenaShouldShowBootHints()
+              : true;
+          if (!bootHintsAllowed && tone === "info") {
+            hideBootMessageImmediately();
+            return;
+          }
+          if (shouldSuppressBootMessage()) {
+            hideBootMessageImmediately();
+            return;
+          }
+          bootMessage.classList.add("is-" + tone);
+          if (scale === "compact" || scale === "detailed") {
+            bootMessage.classList.add("is-" + scale);
+          }
+
+          bootMessage.hidden = false;
+          bootMessage.textContent = nextMessage;
+          window.requestAnimationFrame(function () {
+            bootMessage.classList.add("is-visible");
+          });
+
+          bootMessageTimer = window.setTimeout(function () {
+            bootMessage.classList.remove("is-visible");
+            bootMessageHideTimer = window.setTimeout(function () {
+              bootMessage.hidden = true;
+              clearBootMessageClasses();
+              bootMessage.textContent = "";
+              bootMessageHideTimer = 0;
+            }, BOOT_MESSAGE_FADE_MS);
+            bootMessageTimer = 0;
+          }, BOOT_MESSAGE_TIMEOUT_MS);
+        }
+
+        window.__fighterArenaSetBootMessage = setBootMessage;
+
+        window.addEventListener("error", function (event) {
+          const detail =
+            event && event.error && event.error.name
+              ? event.error.name + ": " + (event.error.message || event.message || "Unknown error")
+              : event.message || "Unknown error";
+          setBootMessage("Startup error: " + detail);
+        });
+
+        window.addEventListener("unhandledrejection", function (event) {
+          const reason =
+            event.reason && event.reason.message
+              ? event.reason.message
+              : String(event.reason || "Unknown error");
+
+          setBootMessage("Startup error: " + reason);
+        });
+      })();
+    </script>
+    <script type="module" src="./src/main.js?v=20260609-ui-pass7"></script>
+    <style>
+      #musicUnlockButton {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        z-index: 9999;
+        display: none;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        border-radius: 14px;
+        border: 1px solid rgba(125, 211, 252, 0.45);
+        background: rgba(18, 50, 86, 0.92);
+        color: #f8fbff;
+        font: 600 14px/1.2 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        box-shadow: 0 20px 40px rgba(5, 17, 31, 0.35);
+        cursor: pointer;
+      }
+
+      #musicUnlockButton[data-visible="true"] {
+        display: inline-flex;
+      }
+    </style>
+    <button id="musicUnlockButton" type="button">Resume Music</button>
+    <script>
+      (function () {
+        const NativeAudioContext = window.AudioContext || window.webkitAudioContext;
+        const trackedContexts = [];
+        const unlockButton = document.getElementById("musicUnlockButton");
+        let unlocked = false;
+
+        if (NativeAudioContext) {
+          const WrappedAudioContext = function (...args) {
+            const context = new NativeAudioContext(...args);
+            trackedContexts.push(context);
+            return context;
+          };
+          WrappedAudioContext.prototype = NativeAudioContext.prototype;
+          window.AudioContext = WrappedAudioContext;
+          if (window.webkitAudioContext) {
+            window.webkitAudioContext = WrappedAudioContext;
+          }
+        }
+
+        async function unlockAudio() {
+          let resumedAny = false;
+          for (const context of trackedContexts) {
+            if (!context || context.state !== "suspended") {
+              continue;
+            }
+            try {
+              await context.resume();
+              resumedAny = true;
+            } catch (error) {
+              console.warn("Audio resume failed", error);
+            }
+          }
+
+          window.__fighterArenaAudioUnlocked = true;
+          window.dispatchEvent(new CustomEvent("fighter-audio-unlock"));
+
+          if (resumedAny || trackedContexts.length > 0) {
+            unlocked = true;
+            unlockButton?.removeAttribute("data-visible");
+          }
+        }
+
+        const wakeAudio = () => {
+          unlockAudio();
+        };
+
+        ["pointerdown", "touchstart", "keydown"].forEach((eventName) => {
+          window.addEventListener(eventName, wakeAudio, { passive: true });
+        });
+
+        unlockButton?.addEventListener("click", wakeAudio);
+        window.addEventListener("fighter-audio-unlock", function () {
+          unlocked = true;
+          unlockButton?.removeAttribute("data-visible");
+        });
+
+        window.addEventListener("load", () => {
+          window.setTimeout(() => {
+            if (!unlocked && !window.__fighterArenaAudioUnlocked) {
+              unlockButton?.setAttribute("data-visible", "true");
+            }
+          }, 1800);
+        });
+      })();
+    </script>
+  </body>
+</html>
